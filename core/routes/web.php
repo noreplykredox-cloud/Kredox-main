@@ -35,12 +35,15 @@ Route::controller('SiteController')->group(function () {
 
     Route::post('subscribe', 'subscribe')->name('subscribe');
 
-    Route::get('blog', 'blog')->name('blog');
-    Route::get('blog/{id}/{slug}', 'blogDetails')->name('blog.details');
+    Route::get('blog', function(){ return to_route('home'); })->name('blog');
+    Route::get('blog/{id}/{slug}', function(){ return to_route('home'); })->name('blog.details');
 
     Route::get('policy/{slug}/{id}', 'policyPages')->name('policy.pages');
 
     Route::get('placeholder-image/{size}', 'placeholderImage')->name('placeholder.image');
+
+    Route::get('/about', function(){ return to_route('home'); });
+    Route::get('/how-it-works', function(){ return to_route('home'); });
 
     Route::get('/{slug}', 'pages')->name('pages');
     Route::get('/', 'index')->name('home');

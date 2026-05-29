@@ -118,21 +118,28 @@
                         </ul>
                     </div>
                 </li>
-<!--
-                <li class="sidebar-menu-item  {{ menuActive('admin.plan.*') }}">
+                <style>
+                    
+                    @media (max-width: 768px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+                </style>
+
+                <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.plan.*') }}">
                     <a href="{{ route('admin.plan.index') }}" class="nav-link"
                         data-default-url="{{ route('admin.plan.index') }}">
-                        <i class="menu-icon las la-paper-plane"></i>
-                        <span class="menu-title">@lang('Plan') </span>
+                        <i class="menu-icon las la-chart-line"></i>
+                        <span class="menu-title">@lang('Investment') </span>
                     </a>
                 </li>
-
-    -->      <!--      <li class="sidebar-menu-item sidebar-dropdown">
+                <li class="sidebar-menu-item sidebar-dropdown">
                     <a href="javascript:void(0)" class="{{ menuActive('admin.pin*', 3) }}">
                         <i class="menu-icon las la-key"></i>
                         <span class="menu-title">@lang('Manage Pins')</span>
                     </a>
-                    -->
                     <div class="sidebar-submenu {{ menuActive('admin.pin*', 2) }} ">
                         <ul>
                             <li class="sidebar-menu-item {{ menuActive('admin.pin.index') }} ">
@@ -172,13 +179,13 @@
                         </ul>
                     </div>
                 </li>
-<!--
-                <li class="sidebar-menu-item sidebar-dropdown">
+
+                <li class="sidebar-menu-item sidebar-dropdown hide-mobile">
                     <a href="javascript:void(0)" class="{{ menuActive('admin.gateway*', 3) }}">
                         <i class="menu-icon las la-credit-card"></i>
                         <span class="menu-title">@lang('Payment Gateways')</span>
                     </a>
-                    -->
+
                     <div class="sidebar-submenu {{ menuActive('admin.gateway*', 2) }} ">
                         <ul>
 
@@ -276,14 +283,12 @@
                     </a>
                     <div class="sidebar-submenu {{ menuActive('admin.withdraw*', 2) }} ">
                         <ul>
-                            <!--
-                            <li class="sidebar-menu-item {{ menuActive('admin.withdraw.method.*') }}">
+                            <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.withdraw.method.*') }}">
                                 <a href="{{ route('admin.withdraw.method.index') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Withdrawal Methods')</span>
                                 </a>
                             </li>
-                            -->
 
                             <li class="sidebar-menu-item {{ menuActive('admin.withdraw.pending') }} ">
                                 <a href="{{ route('admin.withdraw.pending') }}" class="nav-link">
@@ -427,38 +432,37 @@
                     </a>
                 </li>
 
-<!--
-                <li class="sidebar__menu-header">@lang('Settings')</li>
+                <li class="sidebar__menu-header hide-mobile">@lang('Settings')</li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.setting.index') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.index') }}">
                     <a href="{{ route('admin.setting.index') }}" class="nav-link">
                         <i class="menu-icon las la-life-ring"></i>
                         <span class="menu-title">@lang('General Setting')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.setting.system.configuration') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.system.configuration') }}">
                     <a href="{{ route('admin.setting.system.configuration') }}" class="nav-link">
                         <i class="menu-icon las la-cog"></i>
                         <span class="menu-title">@lang('System Configuration')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.setting.logo.icon') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.logo.icon') }}">
                     <a href="{{ route('admin.setting.logo.icon') }}" class="nav-link">
                         <i class="menu-icon las la-images"></i>
                         <span class="menu-title">@lang('Logo & Favicon')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.extensions.index') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.extensions.index') }}">
                     <a href="{{ route('admin.extensions.index') }}" class="nav-link">
                         <i class="menu-icon las la-cogs"></i>
                         <span class="menu-title">@lang('Extensions')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item  {{ menuActive(['admin.language.manage', 'admin.language.key']) }}">
+                <li class="sidebar-menu-item  hide-mobile{{ menuActive(['admin.language.manage', 'admin.language.key']) }}">
                     <a href="{{ route('admin.language.manage') }}" class="nav-link"
                         data-default-url="{{ route('admin.language.manage') }}">
                         <i class="menu-icon las la-language"></i>
@@ -466,14 +470,14 @@
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.seo') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.seo') }}">
                     <a href="{{ route('admin.seo') }}" class="nav-link">
                         <i class="menu-icon las la-globe"></i>
                         <span class="menu-title">@lang('SEO Manager')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.kyc.setting') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.kyc.setting') }}">
                     <a href="{{ route('admin.kyc.setting') }}" class="nav-link">
                         <i class="menu-icon las la-user-check"></i>
                         <span class="menu-title">@lang('KYC Setting')</span>
@@ -481,32 +485,32 @@
                 </li>
 
 
-                <li class="sidebar-menu-item sidebar-dropdown">
+                <li class="sidebar-menu-item sidebar-dropdown hide-mobile">
                     <a href="javascript:void(0)" class="{{ menuActive('admin.setting.notification*', 3) }}">
                         <i class="menu-icon las la-bell"></i>
                         <span class="menu-title">@lang('Notification Setting')</span>
                     </a>
-                    <div class="sidebar-submenu {{ menuActive('admin.setting.notification*', 2) }} ">
+                    <div class="sidebar-submenu hide-mobile {{ menuActive('admin.setting.notification*', 2) }} ">
                         <ul>
-                            <li class="sidebar-menu-item {{ menuActive('admin.setting.notification.global') }} ">
+                            <li class="sidebar-menu-item  hide-mobile{{ menuActive('admin.setting.notification.global') }} ">
                                 <a href="{{ route('admin.setting.notification.global') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Global Template')</span>
                                 </a>
                             </li>
-                            <li class="sidebar-menu-item {{ menuActive('admin.setting.notification.email') }} ">
+                            <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.notification.email') }} ">
                                 <a href="{{ route('admin.setting.notification.email') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Email Setting')</span>
                                 </a>
                             </li>
-                            <li class="sidebar-menu-item {{ menuActive('admin.setting.notification.sms') }} ">
+                            <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.notification.sms') }} ">
                                 <a href="{{ route('admin.setting.notification.sms') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('SMS Setting')</span>
                                 </a>
                             </li>
-                            <li class="sidebar-menu-item {{ menuActive('admin.setting.notification.templates') }} ">
+                            <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.setting.notification.templates') }} ">
                                 <a href="{{ route('admin.setting.notification.templates') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Notification Templates')</span>
@@ -516,28 +520,28 @@
                     </div>
                 </li>
 
-                <li class="sidebar__menu-header">@lang('Frontend Manager')</li>
+                <li class="sidebar__menu-header hide-mobile">@lang('Frontend Manager')</li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.frontend.templates') }}">
+                <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.frontend.templates') }}">
                     <a href="{{ route('admin.frontend.templates') }}" class="nav-link ">
                         <i class="menu-icon la la-html5"></i>
                         <span class="menu-title">@lang('Manage Templates')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.frontend.manage.*') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.frontend.manage.*') }}">
                     <a href="{{ route('admin.frontend.manage.pages') }}" class="nav-link ">
                         <i class="menu-icon la la-list"></i>
                         <span class="menu-title">@lang('Manage Pages')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item sidebar-dropdown">
+                <li class="sidebar-menu-item sidebar-dropdown hide-mobile">
                     <a href="javascript:void(0)" class="{{ menuActive('admin.frontend.sections*', 3) }}">
                         <i class="menu-icon la la-puzzle-piece"></i>
                         <span class="menu-title">@lang('Manage Section')</span>
                     </a>
-                    <div class="sidebar-submenu {{ menuActive('admin.frontend.sections*', 2) }} ">
+                    <div class="sidebar-submenu hide-mobile{{ menuActive('admin.frontend.sections*', 2) }} ">
                         <ul>
                             @php
                                 $lastSegment = collect(request()->segments())->last();
@@ -556,43 +560,43 @@
                     </div>
                 </li>
 
-                <li class="sidebar__menu-header">@lang('Extra')</li>
+                <li class="sidebar__menu-header hide-mobile">@lang('Extra')</li>
 
 
-                <li class="sidebar-menu-item {{ menuActive('admin.maintenance.mode') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.maintenance.mode') }}">
                     <a href="{{ route('admin.maintenance.mode') }}" class="nav-link">
                         <i class="menu-icon las la-robot"></i>
                         <span class="menu-title">@lang('Maintenance Mode')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.setting.cookie') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.cookie') }}">
                     <a href="{{ route('admin.setting.cookie') }}" class="nav-link">
                         <i class="menu-icon las la-cookie-bite"></i>
                         <span class="menu-title">@lang('GDPR Cookie')</span>
                     </a>
                 </li>
 
-                <li class="sidebar-menu-item sidebar-dropdown">
+                <li class="sidebar-menu-item sidebar-dropdown hide-mobile">
                     <a href="javascript:void(0)" class="{{ menuActive('admin.system*', 3) }}">
                         <i class="menu-icon la la-server"></i>
                         <span class="menu-title">@lang('System')</span>
                     </a>
-                    <div class="sidebar-submenu {{ menuActive('admin.system*', 2) }} ">
+                    <div class="sidebar-submenu hide-mobile {{ menuActive('admin.system*', 2) }} ">
                         <ul>
-                            <li class="sidebar-menu-item {{ menuActive('admin.system.info') }} ">
+                            <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.system.info') }} ">
                                 <a href="{{ route('admin.system.info') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Application')</span>
                                 </a>
                             </li>
-                            <li class="sidebar-menu-item {{ menuActive('admin.system.server.info') }} ">
+                            <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.system.server.info') }} ">
                                 <a href="{{ route('admin.system.server.info') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Server')</span>
                                 </a>
                             </li>
-                            <li class="sidebar-menu-item {{ menuActive('admin.system.optimize') }} ">
+                            <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.system.optimize') }} ">
                                 <a href="{{ route('admin.system.optimize') }}" class="nav-link">
                                     <i class="menu-icon las la-dot-circle"></i>
                                     <span class="menu-title">@lang('Cache')</span>
@@ -602,14 +606,13 @@
                     </div>
                 </li>
 
-                <li class="sidebar-menu-item {{ menuActive('admin.setting.custom.css') }}">
+                <li class="sidebar-menu-item hide-mobile{{ menuActive('admin.setting.custom.css') }}">
                     <a href="{{ route('admin.setting.custom.css') }}" class="nav-link">
                         <i class="menu-icon lab la-css3-alt"></i>
                         <span class="menu-title">@lang('Custom CSS')</span>
                     </a>
                 </li>
--->
-                <li class="sidebar-menu-item  {{ menuActive('admin.request.report') }}">
+                <li class="sidebar-menu-item  hide-mobile{{ menuActive('admin.request.report') }}">
                     <a href="{{ route('admin.request.report') }}" class="nav-link"
                         data-default-url="{{ route('admin.request.report') }}">
                         <i class="menu-icon las la-bug"></i>
@@ -617,17 +620,17 @@
                     </a>
                 </li>
             </ul>
-            <!--
-            <div class="text-center mb-3 text-uppercase">
-                <span class="text--primary">{{ __(systemDetails()['name']) }}</span>
-                <span class="text--success">@lang('V'){{ systemDetails()['version'] }} </span>
-            </div>
-            -->
+
+            <!--<div class="text-center mb-3 text-uppercase">-->
+            <!--    <span class="text--primary">{{ __(systemDetails()['name']) }}</span>-->
+            <!--    <span class="text--success">@lang('V'){{ systemDetails()['version'] }} </span>-->
+            <!--</div>-->
+
              <div class="text-center mb-3 text-uppercase">
-                <span class="text--primary">YUKOTRADER</span>
+                <span class="text--primary">KREDOX</span>
                 <span class="text--success">@lang('V'){{ systemDetails()['version'] }} </span>
             </div>
-            
+
         </div>
     </div>
 </div>

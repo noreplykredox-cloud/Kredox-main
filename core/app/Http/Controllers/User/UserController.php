@@ -19,6 +19,28 @@ class UserController extends Controller
     public function home()
     {
         $user = auth()->user();
+        if (request()->ajax() && request()->has('get_overview')) {
+            $general = gs();
+            $totalInvest = $user->invest_amount;
+            $totalReceived = \DB::table('transactions')
+                ->where('user_id', $user->id)
+                ->where('trx_type', '+')
+                ->whereIn('remark', ['referral_commission', 'level_commission', 'manual_payment', 'daily_referral'])
+                ->sum('amount');
+            $totalPotential = $totalInvest * 3;
+            $remaining = $totalPotential - $totalReceived;
+            if ($remaining < 0) {
+                $remaining = 0;
+            }
+
+            return response()->json([
+                'totalInvest' => $general->cur_sym . showAmount($totalInvest),
+                'totalReceived' => $general->cur_sym . showAmount($totalReceived),
+                'remaining' => $general->cur_sym . showAmount($remaining),
+                'totalPotential' => $general->cur_sym . showAmount($totalPotential)
+            ]);
+        }
+
         $pageTitle = 'Dashboard';
         $deposit = $user->deposits()->sum('amount');
         $transactions = $user->transactions()->orderBy('id', 'desc')->limit(8)->get();
@@ -33,7 +55,7 @@ class UserController extends Controller
     public function depositHistory(Request $request)
     {
         $pageTitle = 'Deposit History';
-        $deposits = auth()->user()->deposits()->searchable(['trx'])->with(['gateway'])->orderBy('id', 'desc')->paginate(getPaginate());
+        $deposits = auth()->user()->deposits()->searchable(['trx'])->with(['gateway'])->orderBy('id', 'desc')->get();
         return view($this->activeTemplate . 'user.deposit_history', compact('pageTitle', 'deposits'));
     }
 
@@ -43,7 +65,7 @@ class UserController extends Controller
         $ga = new GoogleAuthenticator();
         $user = auth()->user();
         $secret = $ga->createSecret();
-        $qrCodeUrl = $ga->getQRCodeGoogleUrl($user->username . '@' . $general->site_name, $secret);
+        $qrCodeUrl = $ga->getQRCodeGoogleUrl($user->username . '@' . $general->site_name, $secret, $general->site_name);
         $pageTitle = '2FA Setting';
         return view($this->activeTemplate . 'user.twofactor', compact('pageTitle', 'secret', 'qrCodeUrl'));
     }

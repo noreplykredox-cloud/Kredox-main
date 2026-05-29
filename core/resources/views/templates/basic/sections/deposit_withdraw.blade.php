@@ -6,87 +6,114 @@
 @endphp
    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <nav class="nav">
-  <a href="https://yukotrader.com/user/dashboard" class="nav__link">
+  <a href="{{ route('user.home') }}" class="nav__link">
     <i class="material-icons nav__icon">dashboard</i>
     <span class="nav__text">Dashboard</span>
   </a>
-  <a href="https://yukotrader.com/subscribe/plan" class="nav__link nav__link">
+  <a href="{{ route('plan') }}" class="nav__link ">
     <i class="material-icons nav__icon">travel_explore</i>
     <span class="nav__text">Plan</span>
   </a>
-  <a href="https://yukotrader.com/user/deposit" class="nav__link">
+  <a href="{{ route('user.deposit.index') }}" class="nav__link nav__link--active">
     <i class="material-icons nav__icon">add_card</i>
     <span class="nav__text">Deposit</span>
   </a>
-  <a href="https://yukotrader.com/user/withdraw" class="nav__link">
+  <a href="{{ route('user.withdraw') }}" class="nav__link">
     <i class="material-icons nav__icon">request_quote</i>
     <span class="nav__text">Withdraw</span>
   </a>
-  <a href="https://yukotrader.com/user/referral/users" class="nav__link">
+  <a href="{{ route('user.referral.log') }}" class="nav__link">
     <i class="material-icons nav__icon">diversity_3</i>
     <span class="nav__text">My Team</span>
   </a>
-   <a href="https://yukotrader.com/user/logout" class="nav__link">
+  <a href="{{ route('user.logout') }}" class="nav__link">
     <i class="material-icons nav__icon">logout</i>
     <span class="nav__text">Logout</span>
   </a>
-  
-  
 </nav>
 
-        
-  <style>
-  body {
-    margin: 0 0 55px 0;
+
+<style>
+    :root {
+  --primary-color: #0d8aad;
+  --secondary-color: #00c9a7;
+  --accent-color: #00ffcc;
+  --dark-color: #0a192f;
+  --darker-color: #020c1b;
+  --light-color: #ccd6f6;
+  --lighter-color: #e6f1ff;
+  --success-color: #64ffda;
+  --warning-color: #ff9e64;
+  --danger-color: #ff6b6b;
+  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #00ffcc 100%);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,201,167,0.3);
+  --card-bg: #112240;
+  --nav-bg: #020c1b;
+}
+body {
+    margin: 0 0 65px 0; /* Leave space for bottom nav */
 }
 
+/* ========== Mobile Navigation ========== */
 .nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 55px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-    background: -webkit-linear-gradient(-90deg, #124656 0%, #063a4a 45%, #063b46 100%);
-    display: flex;
-    overflow-x: auto;
-    z-index:2;
+  display: none;
+}
+@media screen and (max-width: 767px) {
+    .nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 65px;
+  background: var(--nav-bg);
+  display: flex;
+  overflow-x: auto;
+  z-index: 1000;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(100, 255, 218, 0.1);
 }
 
 .nav__link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-    min-width: 50px;
-    overflow: hidden;
-    white-space: nowrap;
-    font-family: sans-serif;
-    font-size: 13px;
-    color: #e1d4d4;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.1s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  min-width: 55px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(204, 214, 246, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 6px 3px;
 }
 
 .nav__link:hover {
-    background-color: #eeeeee;
+  color: var(--accent-color);
+  background: rgba(100, 255, 218, 0.05);
 }
 
 .nav__link--active {
-    color: #009578;
+  color: var(--accent-color);
+  background: rgba(100, 255, 218, 0.1);
 }
 
 .nav__icon {
-    font-size: 21px;
-}
-@media screen and (min-width: 600px) {
-  .nav {
-  display: none;
-  }
+  font-size: 22px;
+  margin-bottom: 3px;
+  transition: all 0.3s ease;
 }
 
-  </style>
+.nav__link--active .nav__icon {
+  transform: translateY(-3px);
+}
+
+</style>
      
 <section class="deposit-withdraw padding-bottom padding-top">
     <div class="container">

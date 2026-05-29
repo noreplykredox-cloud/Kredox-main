@@ -9,42 +9,26 @@
                             <thead>
                                 <tr>
                                     <th>@lang('Name')</th>
-                                    <th>@lang('Amount')</th>
-                                    <th>@lang('Referral Bonus')</th>
-                                    <th>@lang('Benefit / Loss')</th>
+                                    <th>@lang('Investment Range')</th>
+                                    <th>@lang('Referral Percentage')</th>
                                     <th>@lang('Status')</th>
                                     <th>@lang('Action')</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($plans as $plan)
-                                    @php
-                                        $totalAmount = $plan->sumLevelOfCommission($plan->id) + $plan->referral_bonus;
-                                        $finalAmount = $plan->price - $totalAmount;
-                                    @endphp
                                     <tr>
                                         <td>
                                             {{ __($plan->name) }}
                                         </td>
 
                                         <td>
-                                            <span>{{ showAmount($plan->price) }}
+                                            <span>{{ showAmount($plan->minimum_investment) }} - {{ $plan->maximum_investment > 0 ? showAmount($plan->maximum_investment) : 'Unlimited' }}
                                                 {{ __($general->cur_text) }}</span>
                                         </td>
 
                                         <td>
-                                            <span>{{ showAmount($plan->referral_bonus) }}
-                                                {{ __($general->cur_text) }}</span>
-                                        </td>
-
-                                        <td>
-                                            @if ($plan->price > $totalAmount)
-                                                <span class="text--success">@lang('Admin Benefit') {{ showAmount($finalAmount) }}
-                                                    {{ __($general->cur_text) }}</span>
-                                            @else
-                                                <span class="text--danger">@lang('Admin Loss')
-                                                    {{ abs(showAmount($finalAmount)) }} {{ __($general->cur_text) }}</span>
-                                            @endif
+                                            <span>{{ getAmount($plan->referral_percentage) }}%</span>
                                         </td>
 
                                         <td>
@@ -62,17 +46,23 @@
 
                                             @if ($plan->status == Status::DISABLE)
                                                 <button class="btn btn-sm btn-outline--success ms-1 confirmationBtn"
-                                                    data-question="@lang('Are you sure to enable this plan?')"
+                                                    data-question="@lang('Are you sure to enable this investment?')"
                                                     data-action="{{ route('admin.plan.status', $plan->id) }}">
                                                     <i class="la la-eye"></i> @lang('Enable')
                                                 </button>
                                             @else
                                                 <button class="btn btn-sm btn-outline--danger ms-1 confirmationBtn"
-                                                    data-question="@lang('Are you sure to disable this plan?')"
+                                                    data-question="@lang('Are you sure to disable this investment?')"
                                                     data-action="{{ route('admin.plan.status', $plan->id) }}">
                                                     <i class="la la-eye-slash"></i> @lang('Disable')
                                                 </button>
                                             @endif
+
+                                            <button class="btn btn-sm btn-outline--danger ms-1 confirmationBtn"
+                                                data-question="@lang('Are you sure you want to delete this plan? This will also delete related levels and manual payments.')"
+                                                data-action="{{ route('admin.plan.delete', $plan->id) }}">
+                                                <i class="la la-trash"></i> @lang('Delete')
+                                            </button>
 
                                         </td>
                                     </tr>
@@ -86,11 +76,6 @@
                         </table>
                     </div>
                 </div>
-                @if ($plans->hasPages())
-                    <div class="card-footer py-4">
-                        @php echo paginateLinks($plans) @endphp
-                    </div>
-                @endif
             </div>
         </div>
     </div>
@@ -99,7 +84,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">@lang('Matrix Setting Update')</h5>
+                    <h5 class="modal-title">@lang('Investment System Settings')</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <i class="las la-times"></i>
                     </button>
@@ -108,13 +93,13 @@
                     @csrf
                     <div class="modal-body">
                         <div class="form-group">
-                            <label>@lang('Matrix Height')</label>
+                            <label>@lang('Matrix Height (Max Levels)')</label>
                             <input type="number" class="form-control form-control-lg" name="matrix_height"
                                 value="{{ $general->matrix_height }}" required="">
                         </div>
 
                         <div class="form-group">
-                            <label>@lang('Matrix Width')</label>
+                            <label>@lang('Matrix Width (Referral Width)')</label>
                             <input type="number" class="form-control form-control-lg" name="matrix_width"
                                 value="{{ $general->matrix_width }}" required="">
                         </div>
@@ -131,10 +116,12 @@
 @endsection
 
 @push('breadcrumb-plugins')
-    <button type="button" class="btn btn-sm btn-outline--info matrixSetting"><i class="las la-paper-plane"></i>@lang('Matrix Setting')</button>
+    <button type="button" class="btn btn-sm btn-outline--info matrixSetting"><i class="las la-cog"></i>@lang('Global Settings')</button>
 
+    @if($plans->count() == 0)
     <a href="{{ route('admin.plan.create') }}" class="btn btn-sm btn-outline--primary addPlan"><i
-            class="las la-plus"></i>@lang('Add Plan')</a>
+            class="las la-plus"></i>@lang('Initialize Investment')</a>
+    @endif
 @endpush
 
 @push('script')

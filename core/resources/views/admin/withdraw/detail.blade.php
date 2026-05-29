@@ -35,6 +35,14 @@
                             @endif
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @lang('Wallet Type')
+                            @if($withdrawal->withdraw_type == 2)
+                                <span class="badge badge--warning">@lang('Investment Amount')</span>
+                            @else
+                                <span class="badge badge--primary">@lang('Current Balance')</span>
+                            @endif
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
                             @lang('Amount')
                             <span class="fw-bold">{{ showAmount($withdrawal->amount ) }} {{ __($general->cur_text) }}</span>
                         </li>

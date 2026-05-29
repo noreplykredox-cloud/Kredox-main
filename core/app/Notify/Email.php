@@ -76,7 +76,10 @@ class Email extends NotifyProcess implements Notifiable{
 	    $headers .= "Reply-To: $general->site_name <$general->email_from> \r\n";
 	    $headers .= "MIME-Version: 1.0\r\n";
 	    $headers .= "Content-Type: text/html; charset=utf-8\r\n";
-	    @mail($this->email, $this->subject, $this->finalMessage, $headers);
+	    $result = @mail($this->email, $this->subject, $this->finalMessage, $headers);
+        if (!$result) {
+            throw new \Exception("PHP mail() function failed to send the email. Please check your server's mail configuration.");
+        }
 	}
 
 	protected function sendSmtpMail(){
@@ -117,8 +120,9 @@ class Email extends NotifyProcess implements Notifiable{
 	    $sendgrid = new SendGrid($general->mail_config->appkey);
 	    $response = $sendgrid->send($sendgridMail);
 	    if($response->statusCode() != 202){
-	    	throw new Exception(json_decode($response->body())->errors[0]->message);
-
+            $body = json_decode($response->body());
+            $errorMsg = $body->errors[0]->message ?? 'Unknown SendGrid error';
+	    	throw new \Exception("SendGrid Error: " . $errorMsg);
 	    }
 	}
 
@@ -146,6 +150,22 @@ class Email extends NotifyProcess implements Notifiable{
 	        ]
 	    ];
 	    $response = $mj->post(Resources::$Email, ['body' => $body]);
+        if (!$response->success()) {
+            $errorMessage = $response->getReasonPhrase() ?: 'Unknown Mailjet error';
+            $bodyData = $response->getBody();
+            if (isset($bodyData['ErrorMessage'])) {
+                $errorMessage = $bodyData['ErrorMessage'];
+            } elseif (isset($bodyData['errors'][0]['message'])) {
+                $errorMessage = $bodyData['errors'][0]['message'];
+            }
+            throw new \Exception("Mailjet Error: " . $errorMessage);
+        } else {
+            $bodyData = $response->getBody();
+            if (isset($bodyData['Messages'][0]['Status']) && $bodyData['Messages'][0]['Status'] === 'error') {
+                $errorMessage = $bodyData['Messages'][0]['Errors'][0]['ErrorMessage'] ?? 'Mailjet message delivery failed';
+                throw new \Exception("Mailjet Error: " . $errorMessage);
+            }
+        }
 	}
 
     /**

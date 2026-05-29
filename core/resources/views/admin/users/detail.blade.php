@@ -263,6 +263,7 @@
                                 <div class="form-group ">
                                     <label>@lang('Country')</label>
                                     <select name="country" class="form-control">
+                                        <option value="">@lang('Select One')</option>
                                         @foreach($countries as $key => $country)
                                             <option data-mobile_code="{{ $country->dial_code }}" value="{{ $key }}">{{ __($country->country) }}</option>
                                         @endforeach
@@ -309,6 +310,96 @@
 
                         </div>
                     </form>
+                </div>
+            </div>
+
+            {{-- Premium Downline Genealogy Tree & Income Schedules Card --}}
+            <div class="card mt-30 border-0 box--shadow2" style="background-color: #0f172a; border-radius: 12px; overflow: hidden;">
+                <div class="card-header bg--dark d-flex justify-content-between align-items-center py-3 px-4" style="border-bottom: 2px solid #1e293b;">
+                    <h5 class="card-title text-white mb-0 d-flex align-items-center gap-2">
+                        <i class="las la-sitemap text--primary" style="font-size: 1.5rem;"></i>
+                        @lang('Downline Genealogy Tree & Income Schedules')
+                    </h5>
+                    <span class="badge bg--primary text-white">@lang('Active Matrix Depth'): {{ gs()->matrix_height }} Levels</span>
+                </div>
+                <div class="card-body p-4" style="background-color: #0f172a;">
+                    <div class="text-white-50 mb-3" style="font-size: 0.9rem; line-height: 1.5;">
+                        <i class="las la-info-circle text--info"></i> @lang('This interactive map displays all registered downline members residing within this user\'s matrix genealogy using high-performance SVG organization chart visualization. Click on the expand buttons to collapse/expand downline nodes, scroll to zoom, drag to pan, and click on any card to view detailed scheduled payouts.')
+                    </div>
+                    
+                    <div class="tree-container" style="padding:0; position: relative; background-color: #020617; border-radius: 12px;">
+                        <div id="chart-container"
+                            style="background: #020617; width: 100%; border-radius: 12px; height: 600px; border: 1px solid rgba(239, 68, 68, 0.2); box-shadow: 0 4px 20px rgba(0,0,0,0.5); overflow:hidden; touch-action: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </div>
+            </div>
+
+            <!-- Tree Member Payout Schedules Modal -->
+            <div id="treeSchedulesModal" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content" style="background-color: #0f172a; border: 1px solid #1e293b; border-radius: 12px; overflow: hidden;">
+                        <div class="modal-header" style="border-bottom: 1px solid #1e293b; background-color: #1e293b;">
+                            <h5 class="modal-title text-white d-flex align-items-center gap-2">
+                                <i class="las la-coins text--warning" style="font-size: 1.5rem;"></i>
+                                <span id="modalTitleUser">@lang('User Payout Schedules')</span>
+                            </h5>
+                            <button type="button" class="close text-white border-0 bg-transparent" data-bs-dismiss="modal" aria-label="Close" style="font-size: 1.5rem;">
+                                <i class="las la-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body p-4 text-white">
+                            <div class="row mb-4">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="p-3 rounded" style="background-color: #1e293b; border: 1px solid #334155;">
+                                        <h6 class="text-white mb-2"><i class="las la-id-card text--primary"></i> @lang('Member Details')</h6>
+                                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                                            <div><strong>@lang('Full Name'):</strong> <span id="modalFullName" class="text-white-50"></span></div>
+                                            <div><strong>@lang('Email'):</strong> <span id="modalEmail" class="text-white-50"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="p-3 rounded" style="background-color: #1e293b; border: 1px solid #334155;">
+                                        <h6 class="text-white mb-2"><i class="las la-wallet text--success"></i> @lang('Investment Details')</h6>
+                                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                                            <div><strong>@lang('Active Plan'):</strong> <span id="modalPlanName" class="text-success fw-bold"></span></div>
+                                            <div><strong>@lang('Total Invested'):</strong> <span id="modalInvestAmount" class="text-white-50"></span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <h6 class="text-white mb-2"><i class="las la-coins text--warning"></i> @lang('All Scheduled & Active Payouts')</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered text-center text-white" style="background-color: #020617; border-color: #1e293b;">
+                                    <thead>
+                                        <tr style="background-color: #1e293b;">
+                                            <th>@lang('Description')</th>
+                                            <th>@lang('Rate / %')</th>
+                                            <th>@lang('Payout Payment')</th>
+                                            <th>@lang('Frequency')</th>
+                                            <th>@lang('Exclude Weekends')</th>
+                                            <th>@lang('Status')</th>
+                                            <th>@lang('Next Execution')</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modalSchedulesTableBody">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <form id="payScheduleForm" action="{{ route('admin.users.pay.schedule', $user->id) }}" method="POST" style="display: none;">
+                                @csrf
+                                <input type="hidden" name="schedule_type" id="payScheduleType">
+                                <input type="hidden" name="schedule_id" id="payScheduleId">
+                                <input type="hidden" name="downline_id" id="payDownlineId">
+                                <input type="hidden" name="level" id="payLevel">
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -592,12 +683,19 @@
             mobileElement.text(`+${$('select[name=country] :selected').data('mobile_code')}`);
         });
 
-        $('select[name=country]').val('{{@$user->country_code}}');
+        let countryCode = '{{@$user->country_code}}';
+        if(countryCode){
+            $('select[name=country]').val(countryCode);
+        }
+        
         let dialCode        = $('select[name=country] :selected').data('mobile_code');
         let mobileNumber    = `{{ $user->mobile }}`;
-        mobileNumber        = mobileNumber.replace(dialCode,'');
+        
+        if(dialCode){
+            mobileNumber    = mobileNumber.replace(dialCode,'');
+            mobileElement.text(`+${dialCode}`);
+        }
         $('input[name=mobile]').val(mobileNumber);
-        mobileElement.text(`+${dialCode}`);
 
     })(jQuery);
 </script>
@@ -650,5 +748,226 @@
             }
         });
     })(jQuery);
+</script>
+
+<!-- D3 and OrgChart libraries -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3.1.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+
+<script>
+    let chart;
+    let orgChartData = {!! $orgChartJson !!};
+
+    function renderOrgChart() {
+        if (!chart) {
+            chart = new d3.OrgChart()
+                .container('#chart-container')
+                .data(orgChartData)
+                .nodeWidth((d) => 240)
+                .initialZoom(0.75)
+                .nodeHeight((d) => 200)
+                .childrenMargin((d) => 60)
+                .compact(false)
+                .layout("top")
+                .onNodeClick(d => {
+                    showSchedulesModalFromNode(d.data);
+                })
+                .linkUpdate(function (d, i, arr) {
+                    d3.select(this)
+                        .attr("stroke", "rgba(239, 68, 68, 0.4)")
+                        .attr("stroke-width", 2);
+                })
+                .buttonContent(({ node, state }) => {
+                    return `<div style="color:#ffffff; border-radius:50%; width:28px; height:28px; display:flex; justify-content:center; align-items:center; background-color:#0f172a; border:1.5px solid #ef4444; box-shadow:0 0 10px rgba(0,0,0,0.5); font-size:14px; transition:all 0.3s; cursor:pointer;" onMouseOver="this.style.background='#ef4444'" onMouseOut="this.style.background='#0f172a'">
+                                <i class="las ${node.children ? 'la-minus' : 'la-plus'}" style="color: #ffffff !important; line-height: 28px;"></i>
+                            </div>`;
+                })
+                .nodeContent(function (d, i, arr, state) {
+                    const isRoot = d.data.parentId === '';
+
+                    // Parse schedules to check for active items
+                    const schedules = typeof d.data.schedules === 'string' ? JSON.parse(d.data.schedules) : d.data.schedules;
+                    const hasActiveSchedule = Array.isArray(schedules) && schedules.some(s => s.frequency !== 'Completed');
+
+                    const borderColor = hasActiveSchedule ? '#fbbf24' : '#ef4444';
+                    const avatarShadow = hasActiveSchedule ? '0 0 12px rgba(251, 191, 36, 0.6)' : '0 0 10px rgba(239, 68, 68, 0.4)';
+                    const boxShadow = hasActiveSchedule 
+                        ? '0 0 25px rgba(251, 191, 36, 0.65)' 
+                        : (isRoot ? '0 0 20px rgba(239, 68, 68, 0.4)' : '0 4px 25px rgba(0,0,0,0.5)');
+                    const borderStyle = isRoot 
+                        ? `2px solid ${borderColor}` 
+                        : `1px solid ${hasActiveSchedule ? '#fbbf24' : 'rgba(239, 68, 68, 0.3)'}`;
+
+                    let imageHtml = '';
+                    if (d.data.image && d.data.image.trim() !== '') {
+                        imageHtml = `<img src="${d.data.image}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+                    } else {
+                        imageHtml = `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #1f2937; border-radius: 50%;">
+                                        <i class="las la-user-circle" style="font-size: 42px; color: ${borderColor};"></i>
+                                     </div>`;
+                    }
+
+                    const payBadgeHtml = hasActiveSchedule 
+                        ? `<div style="position: absolute; top: -10px; right: -10px; background: linear-gradient(135deg, #fbbf24, #d97706); color: #000; font-size: 8px; font-weight: 800; border-radius: 20px; padding: 3px 8px; box-shadow: 0 0 12px rgba(251, 191, 36, 0.8); z-index: 10; display: flex; align-items: center; gap: 3px; border: 1.5px solid #0f172a; text-transform: uppercase;">
+                               <i class="las la-clock" style="font-size: 10px; font-weight: bold; margin-right: 1px;"></i>PAY ACTIVE
+                           </div>`
+                        : '';
+
+                    return `
+                        <div style="font-family: inherit; box-sizing: border-box; width:${d.width}px; height:${d.height}px; padding-top:20px; background: linear-gradient(145deg, #111827, #0f172a); border: ${borderStyle}; border-radius: 12px; box-shadow: ${boxShadow}; display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer;">
+                            
+                            <!-- Bouncing Golden Payout Active Badge -->
+                            ${payBadgeHtml}
+
+                            <!-- Hover click overlay -->
+                            <div style="position: absolute; top:0; left:0; width:100%; height:100%; z-index: 5;" title="Click to view assigned income schedules"></div>
+
+                            <div style="flex-shrink: 0; width: 60px; height: 60px; border-radius: 50%; border: 2px solid ${borderColor}; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; background: #1f2937; z-index: 2; box-shadow: ${avatarShadow}; padding: 2px; overflow: hidden;">
+                                ${imageHtml}
+                            </div>
+
+                            <div style="flex-shrink: 0; color: #fff; font-weight: 600; font-size: 14px; margin-bottom: 2px; text-align: center; width: 90%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: capitalize;">${d.data.name}</div>
+                            <div style="flex-shrink: 0; color: rgba(255,255,255,0.5); font-size: 11px; margin-bottom: 6px; text-align: center; font-weight: 500;">@${d.data.username}</div>
+
+                            ${!isRoot ? `<div style="flex-shrink: 0; margin-bottom: auto; text-align: center;"><span style="background: ${hasActiveSchedule ? 'rgba(251,191,36,0.1)' : 'rgba(239, 68, 68, 0.1)'}; color: ${borderColor}; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: 1px solid ${hasActiveSchedule ? 'rgba(251,191,36,0.2)' : 'rgba(239, 68, 68, 0.2)'};">Level ${d.data.level}</span></div>` : `<div style="flex-shrink: 0; margin-bottom: auto; text-align: center;"><span style="background: ${hasActiveSchedule ? 'rgba(251,191,36,0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${borderColor}; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; border: 1px solid ${hasActiveSchedule ? 'rgba(251,191,36,0.3)' : 'rgba(239, 68, 68, 0.3)'};">Root Upline</span></div>`}
+
+                            <div style="box-sizing: border-box; display: flex; justify-content: space-between; width: 100%; border-top: 1px solid #1f2937; background: #1f2937; padding: 8px 12px 10px 12px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;">
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48%; border-right: 1px solid rgba(255,255,255,0.05);">
+                                    <span style="color: rgba(255,255,255,0.4); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Team</span>
+                                    <span style="color: #fff; font-weight: 600; font-size: 12px;">
+                                        <i class="las la-users" style="color: ${borderColor}; margin-right: 3px; font-size: 11px;"></i>${d.data.teamSize}
+                                    </span>
+                                </div>
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; width: 48%;">
+                                    <span style="color: rgba(255,255,255,0.4); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;">Investment</span>
+                                    <span style="color: #f1f1f1; font-weight: 600; font-size: 12px;">
+                                        $${Number(d.data.volume).toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                        `;
+                })
+                .render();
+
+            // Collapse nodes beyond depth 2
+            chart.getNodes().forEach(node => {
+                if (node.depth >= 2) {
+                    chart.setExpanded(node.id, false);
+                }
+            });
+
+            chart.render().fit();
+        }
+    }
+
+    function showSchedulesModalFromNode(data) {
+        const schedules = typeof data.schedules === 'string' ? JSON.parse(data.schedules) : data.schedules;
+        
+        document.getElementById('modalTitleUser').innerText = `Income Schedules for @${data.username}`;
+        document.getElementById('modalFullName').innerText = data.name;
+        document.getElementById('modalEmail').innerText = data.email || 'N/A';
+        document.getElementById('modalPlanName').innerText = data.plan_name || 'No Active Plan';
+        document.getElementById('modalInvestAmount').innerText = `$${Number(data.volume).toFixed(2)}`;
+        
+        const tbody = document.getElementById('modalSchedulesTableBody');
+        tbody.innerHTML = '';
+        
+        if (!schedules || schedules.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-muted italic py-3 text-center">No active ROI or direct payment schedules found for this member.</td></tr>`;
+        } else {
+            schedules.forEach(sched => {
+                const tr = document.createElement('tr');
+                const targetText = sched.target_percentage 
+                    ? `<br><small class="text-white-50" style="font-size: 10px;">${sched.target_percentage}</small>` 
+                    : '';
+                const targetPayoutText = sched.target_payout 
+                    ? `<br><small class="text-white-50" style="font-size: 10px; font-weight: 500;">${sched.target_payout}</small>` 
+                    : '';
+
+                let badgeLabel = 'Plan ROI';
+                if (sched.description.includes('Direct') || sched.description.includes('Specific')) {
+                    badgeLabel = 'Direct';
+                } else if (sched.description.includes('Referral') || sched.description.includes('Level')) {
+                    badgeLabel = 'Level Income';
+                }
+
+                let actionBtnHtml = '';
+                if (sched.status !== 'Completed' && sched.status !== 'Paid Today' && sched.status !== 'Expired / Completed') {
+                    let schedType = 'plan';
+                    if (sched.description.includes('Direct') || sched.description.includes('User Specific')) {
+                        schedType = 'user';
+                    } else if (sched.description.includes('Level') || sched.description.includes('Referral')) {
+                        schedType = 'level';
+                    }
+                    actionBtnHtml = `
+                        <button type="button" class="btn btn-sm btn--success btn-pay-now py-1 px-2 ms-2" 
+                            data-schedule-id="${sched.schedule_id || ''}" 
+                            data-type="${schedType}" 
+                            data-downline-id="${sched.downline_id || ''}"
+                            data-level="${sched.level_num || ''}"
+                            style="font-size: 0.7rem; line-height: 1;">
+                            <i class="las la-wallet"></i> Pay Now
+                        </button>
+                    `;
+                }
+
+                tr.innerHTML = `
+                    <td style="text-align: left; vertical-align: middle;">
+                        <span class="badge ${sched.badge_class} me-1" style="font-size: 0.7rem;">
+                            ${badgeLabel}
+                        </span>
+                        ${sched.description}
+                    </td>
+                    <td style="vertical-align: middle; line-height: 1.3;">
+                        <span class="badge bg-dark border border-secondary text-white">${sched.amount}</span>
+                        ${targetText}
+                    </td>
+                    <td style="font-weight: 800; color: #fbbf24; vertical-align: middle; font-size: 1.05rem; line-height: 1.3;">
+                        ${sched.payout_amount}
+                        ${targetPayoutText}
+                    </td>
+                    <td style="vertical-align: middle;"><span class="badge bg-secondary">${sched.frequency}</span></td>
+                    <td style="vertical-align: middle;">
+                        ${sched.exclude_weekends === 'Yes' 
+                            ? '<span class="text-danger fw-bold">Yes</span>' 
+                            : '<span class="text-success fw-bold">No</span>'}
+                    </td>
+                    <td style="vertical-align: middle;">
+                        <span class="${sched.status_class || 'badge bg-primary'}" style="font-size: 0.75rem;">
+                            ${sched.status || 'Active'}
+                        </span>
+                    </td>
+                    <td style="font-weight: bold; color: #34d399; vertical-align: middle;">
+                        <div class="d-flex align-items-center justify-content-center gap-1">
+                            <span><i class="las la-clock"></i> ${sched.next_run}</span>
+                            ${actionBtnHtml}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+        
+        $('#treeSchedulesModal').modal('show');
+    }
+
+    $(document).ready(function() {
+        setTimeout(() => {
+            renderOrgChart();
+        }, 300);
+
+        $(document).on('click', '.btn-pay-now', function() {
+            if (confirm('Are you sure you want to process this payout immediately?')) {
+                $('#payScheduleType').val($(this).data('type'));
+                $('#payScheduleId').val($(this).data('schedule-id'));
+                $('#payDownlineId').val($(this).data('downline-id'));
+                $('#payLevel').val($(this).data('level'));
+                $('#payScheduleForm').submit();
+            }
+        });
+    });
 </script>
 @endpush

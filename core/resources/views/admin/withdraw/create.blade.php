@@ -80,6 +80,13 @@
                                                         <div class="input-group-text">%</div>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label>@lang('Investment Percent Charge')</label>
+                                                    <div class="input-group">
+                                                        <input type="number" step="any" class="form-control" name="investment_charge" value="{{ old('investment_charge', 20) }}" required>
+                                                        <div class="input-group-text">%</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

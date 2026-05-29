@@ -43,6 +43,20 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
+        $reference = @$_GET['reference'] ?: @$_GET['node'];
+        if ($reference) {
+            if (strpos($reference, 'NODE_') === 0) {
+                $hex = substr($reference, 5);
+                if (preg_match('/^[0-9a-fA-F]+$/', $hex)) {
+                    $decoded = @hex2bin($hex);
+                    if ($decoded) {
+                        $reference = $decoded;
+                    }
+                }
+            }
+            session()->put('reference', $reference);
+        }
+        
         $pageTitle = "Register";
         $info = json_decode(json_encode(getIpInfo()), true);
         $mobileCode = @implode(',', $info['code']);
@@ -78,126 +92,121 @@ class RegisterController extends Controller
             'password' => ['required','confirmed',$passwordValidation],
             'username' => 'required|unique:users|min:6',
             'captcha' => 'sometimes|required',
-            'mobile_code' => 'required|in:'.$mobileCodes,
-            'country_code' => 'required|in:'.$countryCodes,
-            'country' => 'required|in:'.$countries,
             'agree' => $agree
         ]);
         return $validate;
 
     }
+public function register(Request $request)
+{
+    $this->validator($request->all())->validate();
 
-    public function register(Request $request)
-    {
-        $this->validator($request->all())->validate();
-
-        $request->session()->regenerateToken();
-
-        if(preg_match("/[^a-z0-9_]/", trim($request->username))){
-            $notify[] = ['info', 'Username can contain only small letters, numbers and underscore.'];
-            $notify[] = ['error', 'No special character, space or capital letters in username.'];
-            return back()->withNotify($notify)->withInput($request->all());
+    // Username validation
+    if(preg_match("/[^a-z0-9_]/", trim($request->username))) {
+        if ($request->ajax()) {
+            return response()->json(['status' => 'error', 'message' => 'Username can contain only small letters, numbers and underscore.'], 422);
         }
-
-        if(!verifyCaptcha()){
-            $notify[] = ['error','Invalid captcha provided'];
-            return back()->withNotify($notify);
-        }
-
-
-        $exist = User::where('mobile',$request->mobile_code.$request->mobile)->first();
-        if ($exist) {
-            $notify[] = ['error', 'The mobile number already exists'];
-            return back()->withNotify($notify)->withInput();
-        }
-
-        event(new Registered($user = $this->create($request->all())));
-
-        $this->guard()->login($user);
-
-        return $this->registered($request, $user)
-            ?: redirect($this->redirectPath());
+        $notify[] = ['info', 'Username can contain only small letters, numbers and underscore.'];
+        $notify[] = ['error', 'No special character, space or capital letters in username.'];
+        return back()->withNotify($notify)->withInput($request->all());
     }
 
-
-    /**
-     * Create a new user instance after a valid registration.
-     *
-     * @param  array $data
-     * @return \App\User
-     */
-    protected function create(array $data)
-    {
-        $general = gs();
-
-        $referBy = session()->get('reference');
-        if ($referBy) {
-            $referUser = User::where('username', $referBy)->first();
-        } else {
-            $referUser = null;
+    // Captcha validation
+    if(!verifyCaptcha()) {
+        if ($request->ajax()) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid captcha provided'], 422);
         }
-        //User Create
-        $user = new User();
-        $user->email = strtolower(trim($data['email']));
-        $user->password = Hash::make($data['password']);
-        $user->username = trim($data['username']);
-        $user->ref_by = $referUser ? $referUser->id : 0;
-        $user->country_code = $data['country_code'];
-        $user->mobile = $data['mobile_code'].$data['mobile'];
-        $user->address = [
-            'address' => '',
-            'state' => '',
-            'zip' => '',
-            'country' => isset($data['country']) ? $data['country'] : null,
-            'city' => ''
-        ];
-        $user->kv = $general->kv ? Status::NO : Status::YES;
-        $user->ev = $general->ev ? Status::NO : Status::YES;
-        $user->sv = $general->sv ? Status::NO : Status::YES;
-        $user->ts = 0;
-        $user->tv = 1;
-        $user->save();
-
-
-        $adminNotification = new AdminNotification();
-        $adminNotification->user_id = $user->id;
-        $adminNotification->title = 'New member registered';
-        $adminNotification->click_url = urlPath('admin.users.detail',$user->id);
-        $adminNotification->save();
-
-
-        //Login Log Create
-        $ip = getRealIP();
-        $exist = UserLogin::where('user_ip',$ip)->first();
-        $userLogin = new UserLogin();
-
-        //Check exist or not
-        if ($exist) {
-            $userLogin->longitude =  $exist->longitude;
-            $userLogin->latitude =  $exist->latitude;
-            $userLogin->city =  $exist->city;
-            $userLogin->country_code = $exist->country_code;
-            $userLogin->country =  $exist->country;
-        }else{
-            $info = json_decode(json_encode(getIpInfo()), true);
-            $userLogin->longitude =  @implode(',',$info['long']);
-            $userLogin->latitude =  @implode(',',$info['lat']);
-            $userLogin->city =  @implode(',',$info['city']);
-            $userLogin->country_code = @implode(',',$info['code']);
-            $userLogin->country =  @implode(',', $info['country']);
-        }
-
-        $userAgent = osBrowser();
-        $userLogin->user_id = $user->id;
-        $userLogin->user_ip =  $ip;
-
-        $userLogin->browser = @$userAgent['browser'];
-        $userLogin->os = @$userAgent['os_platform'];
-        $userLogin->save();
-
-
-        return $user;
+        $notify[] = ['error','Invalid captcha provided'];
+        return back()->withNotify($notify);
     }
+
+    // Mobile number check
+    $exist = User::where('mobile', $request->mobile_code.$request->mobile)->first();
+    if ($exist) {
+        if ($request->ajax()) {
+            return response()->json(['status' => 'error', 'message' => 'The mobile number already exists'], 422);
+        }
+        $notify[] = ['error', 'The mobile number already exists'];
+        return back()->withNotify($notify)->withInput();
+    }
+
+    event(new Registered($user = $this->create($request->all())));
+
+    $this->guard()->login($user);
+
+    return $this->registered($request, $user)
+        ?: redirect($this->redirectPath());
+}
+
+protected function create(array $data)
+{
+    $general = gs();
+
+    $referBy = session()->get('reference');
+    $referUser = $referBy ? User::where('username', $referBy)->first() : null;
+
+    //User Create
+    $user = new User();
+    $user->email = strtolower(trim($data['email']));
+    $user->firstname = trim($data['firstname']);
+    $user->lastname = trim($data['lastname']);
+    $user->password = Hash::make($data['password']);
+    $user->username = trim($data['username']);
+    $user->ref_by = $referUser ? $referUser->id : 0;
+    $user->country_code = $data['country_code'];
+    $user->mobile = $data['mobile_code'].$data['mobile'];
+    
+    $user->address = [
+        'address' => $data['address'] ?? '',
+        'state' => $data['state'] ?? '',
+        'zip' => $data['zip'] ?? '',
+        'country' => $data['country'] ?? null,
+        'city' => $data['city'] ?? ''
+    ];
+    
+    $user->kv = $general->kv ? Status::NO : Status::YES;
+    $user->ev = $general->ev ? Status::NO : Status::YES;
+    $user->sv = $general->sv ? Status::NO : Status::YES;
+    $user->ts = 0;
+    $user->tv = 1;
+    $user->profile_complete = 1;
+    $user->save();
+
+    $adminNotification = new AdminNotification();
+    $adminNotification->user_id = $user->id;
+    $adminNotification->title = 'New member registered';
+    $adminNotification->click_url = urlPath('admin.users.detail', $user->id);
+    $adminNotification->save();
+
+    // Login Log
+    $ip = getRealIP();
+    $exist = UserLogin::where('user_ip', $ip)->first();
+    $userLogin = new UserLogin();
+
+    if ($exist) {
+        $userLogin->longitude = $exist->longitude;
+        $userLogin->latitude = $exist->latitude;
+        $userLogin->city = $exist->city;
+        $userLogin->country_code = $exist->country_code;
+        $userLogin->country = $exist->country;
+    } else {
+        $info = json_decode(json_encode(getIpInfo()), true);
+        $userLogin->longitude = @implode(',', $info['long']);
+        $userLogin->latitude = @implode(',', $info['lat']);
+        $userLogin->city = @implode(',', $info['city']);
+        $userLogin->country_code = @implode(',', $info['code']);
+        $userLogin->country = @implode(',', $info['country']);
+    }
+
+    $userAgent = osBrowser();
+    $userLogin->user_id = $user->id;
+    $userLogin->user_ip = $ip;
+    $userLogin->browser = @$userAgent['browser'];
+    $userLogin->os = @$userAgent['os_platform'];
+    $userLogin->save();
+
+    return $user;
+}
 
     public function checkUser(Request $request){
         $exist['data'] = false;

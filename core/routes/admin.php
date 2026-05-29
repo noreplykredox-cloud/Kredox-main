@@ -72,6 +72,7 @@ Route::middleware('admin')->group(function () {
         Route::post('send-notification/{id}', 'sendNotificationSingle')->name('notification.single');
         Route::get('login/{id}', 'login')->name('login');
         Route::post('status/{id}', 'status')->name('status');
+        Route::post('pay-schedule/{id}', 'paySchedule')->name('pay.schedule');
 
         Route::get('send-notification', 'showNotificationAllForm')->name('notification.all');
         Route::post('send-notification', 'sendNotificationAll')->name('notification.all.send');
@@ -282,7 +283,7 @@ Route::middleware('admin')->group(function () {
     Route::controller('PlanController')->prefix('plan')->name('plan.')->group(function () {
         Route::get('/', 'index')->name('index');
       	Route::post('manual-payment/{plan}', 'storeManualPayment')->name('manual.payment');
-      	Route::post('manual-payment/delete/{id}', 'deleteManualPayment')->name('manual.payment.delete');
+      	Route::get('manual-payment/delete/{id}', 'deleteManualPayment')->name('manual.payment.delete');
         Route::post('manual-payment/update/{id}', 'updateManualPayment')->name('manual.payment.update');
         Route::get('create', 'create')->name('create');
         Route::post('store', 'store')->name('store');
@@ -290,6 +291,7 @@ Route::middleware('admin')->group(function () {
         Route::post('update/{id}', 'update')->name('update');
         Route::post('setting', 'matrixSetting')->name('matrix.setting');
         Route::post('status/{id}', 'status')->name('status');
+        Route::post('delete/{id}', 'delete')->name('delete');
     });
 
     // Pin Controller

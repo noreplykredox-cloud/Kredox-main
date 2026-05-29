@@ -3,81 +3,117 @@
 @endphp
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 <nav class="nav">
-  <a href="https://yukotrader.com/" class="nav__link">
-    <i class="material-icons nav__icon">home</i>
-    <span class="nav__text">Home</span>
-  </a>
-  <a href="https://yukotrader.com/about" class="nav__link nav__link">
-    <i class="material-icons nav__icon">settings_accessibility</i>
-    <span class="nav__text">About-Us</span>
-  </a>
-  <a href="https://yukotrader.com/how-it-works" class="nav__link">
-    <i class="material-icons nav__icon">receipt_long</i>
-    <span class="nav__text">how it works</span>
-  </a>
-  <a href="https://yukotrader.com/contact" class="nav__link">
-    <i class="material-icons nav__icon">connect_without_contact</i>
-    <span class="nav__text">Contact</span>
-  </a>
-  <a href="https://yukotrader.com/user/dashboard" class="nav__link">
-    <i class="material-icons nav__icon">input</i>
-    <span class="nav__text">Login/Signup</span>
-  </a>
+    <a href="{{ route('home') }}" class="nav__link">
+        <i class="material-icons nav__icon">home</i>
+        <span class="nav__text">@lang('Home')</span>
+    </a>
+    <a href="{{ route('pages', ['about']) }}" class="nav__link nav__link--active">
+        <i class="material-icons nav__icon">info</i>
+        <span class="nav__text">@lang('About')</span>
+    </a>
+    <a href="{{ route('pages', ['how-it-works']) }}" class="nav__link">
+        <i class="material-icons nav__icon">help</i>
+        <span class="nav__text">@lang('How It Works')</span>
+    </a>
+    <a href="{{ route('contact') }}" class="nav__link ">
+        <i class="material-icons nav__icon">mail</i>
+        <span class="nav__text">@lang('Contact')</span>
+    </a>
+    @guest
+        <a href="{{ route('user.login') }}" class="nav__link ">
+            <i class="material-icons nav__icon">login</i>
+            <span class="nav__text">@lang('Login')</span>
+        </a>
+    @else
+        <a href="{{ route('user.home') }}" class="nav__link">
+            <i class="material-icons nav__icon">dashboard</i>
+            <span class="nav__text">@lang('Dashboard')</span>
+        </a>
+    @endguest
 </nav>
 
         
-  <style>
-  body {
-    margin: 0 0 55px 0;
+ <style>
+    :root {
+  --primary-color: #0d8aad;
+  --secondary-color: #00c9a7;
+  --accent-color: #00ffcc;
+  --dark-color: #0a192f;
+  --darker-color: #020c1b;
+  --light-color: #ccd6f6;
+  --lighter-color: #e6f1ff;
+  --success-color: #64ffda;
+  --warning-color: #ff9e64;
+  --danger-color: #ff6b6b;
+  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--accent-color) 0%, #00ffcc 100%);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 30px rgba(0,201,167,0.3);
+  --card-bg: #112240;
+  --nav-bg: #020c1b;
+}
+body {
+    margin: 0 0 65px 0; /* Leave space for bottom nav */
 }
 
+/* ========== Mobile Navigation ========== */
 .nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 55px;
-    box-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
-    background: -webkit-linear-gradient(-90deg, #124656 0%, #063a4a 45%, #063b46 100%);
-    display: flex;
-    overflow-x: auto;
-    z-index:2;
+  display: none;
+}
+@media screen and (max-width: 767px) {
+    .nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 65px;
+  background: var(--nav-bg);
+  display: flex;
+  overflow-x: auto;
+  z-index: 1000;
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(100, 255, 218, 0.1);
 }
 
 .nav__link {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-    min-width: 50px;
-    overflow: hidden;
-    white-space: nowrap;
-    font-family: sans-serif;
-    font-size: 13px;
-    color: #e1d4d4;
-    text-decoration: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.1s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  min-width: 55px;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(204, 214, 246, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  padding: 6px 3px;
 }
 
 .nav__link:hover {
-    background-color: #eeeeee;
+  color: var(--accent-color);
+  background: rgba(100, 255, 218, 0.05);
 }
 
 .nav__link--active {
-    color: #009578;
+  color: var(--accent-color);
+  background: rgba(100, 255, 218, 0.1);
 }
 
 .nav__icon {
-    font-size: 21px;
-}
-@media screen and (min-width: 600px) {
-  .nav {
-  display: none;
-  }
+  font-size: 22px;
+  margin-bottom: 3px;
+  transition: all 0.3s ease;
 }
 
-  </style>
+.nav__link--active .nav__icon {
+  transform: translateY(-3px);
+}
+
+</style>
 <section class="about-section padding-top padding-bottom">
     <div class="container">
         <div class="row mb--50">

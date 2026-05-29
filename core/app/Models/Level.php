@@ -10,5 +10,6 @@ class Level extends Model
         'plan_id',
         'level',
         'amount',
+        'percentage',
     ];
 }

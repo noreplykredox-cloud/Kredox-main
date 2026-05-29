@@ -22,6 +22,7 @@ class ProcessManualPayments extends Command
         $this->trx = getTrx();
 
         $payments = ManualPayment::where('status', 'active')
+            ->where('start_time', '<=', $now)
             ->whereTime('start_time', '<=', $now->toTimeString())
             ->where(function ($query) use ($now) {
                 $query->where(function ($q) use ($now) {
@@ -44,10 +45,48 @@ class ProcessManualPayments extends Command
             ->get();
 
         foreach ($payments as $payment) {
+            // Check if it is a monthly calculated payment and only run in the selected month
+            if ($payment->selected_month && $payment->selected_month !== 'all') {
+                if ($now->format('Y-m') !== $payment->selected_month) {
+                    continue;
+                }
+            }
+
+            // Check if weekends should be excluded
+            if ($payment->exclude_weekends) {
+                if ($now->isWeekend()) {
+                    $this->info("⏭️ Skipped execution for payment ID {$payment->id} because weekends are excluded.");
+                    continue;
+                }
+            }
+
+            // Dynamically calculate daily percentage if recurring monthly target is active
+            if ($payment->selected_month === 'all' && $payment->monthly_percentage > 0) {
+                $totalDays = $now->daysInMonth;
+                $workingDays = 0;
+
+                if ($payment->exclude_weekends) {
+                    $tempDate = $now->copy()->startOfMonth();
+                    $endDate = $now->copy()->endOfMonth();
+                    while ($tempDate->lte($endDate)) {
+                        if (!$tempDate->isWeekend()) {
+                            $workingDays++;
+                        }
+                        $tempDate->addDay();
+                    }
+                    $daysCount = $workingDays;
+                } else {
+                    $daysCount = $totalDays;
+                }
+
+                $dynamicPercentage = $daysCount > 0 ? ($payment->monthly_percentage / $daysCount) : 0;
+                $payment->percentage = $dynamicPercentage;
+            }
+
             if ($payment->type === 'user') {
                 $this->processUserPayment($payment);
             } elseif ($payment->type === 'plan') {
-                $this->processPlanPayment($payment);
+                $this->processPlanPayment($payment, $now);
             }
         }
 
@@ -78,25 +117,53 @@ class ProcessManualPayments extends Command
         $this->info("✅ Credited ₹{$payment->amount} to user {$user->username} (Manual Payment)");
     }
 
-    private function processPlanPayment($payment)
+    private function processPlanPayment($payment, $now)
     {
-        $users = User::where('plan_id', $payment->plan_id)->get();
+        $users = User::where('plan_id', $payment->plan_id)->where('invest_amount', '>', 0)->get();
         if ($users->isEmpty()) return;
 
         foreach ($users as $user) {
-            $user->balance += $payment->amount;
+            // Deduplication: skip if user was already paid today for this plan ROI description
+            $alreadyPaidToday = Transaction::where('user_id', $user->id)
+                ->where('remark', 'manual_payment')
+                ->where('details', 'like', '%Plan ROI%')
+                ->where('details', 'like', '%' . $payment->description . '%')
+                ->whereDate('created_at', Carbon::today())
+                ->exists();
+
+            if ($alreadyPaidToday) {
+                $this->info("⏭️ Skipped {$user->username} because they were already paid today.");
+                continue;
+            }
+
+            $amount = ($user->invest_amount * $payment->percentage / 100);
+            if ($amount <= 0) continue;
+
+            $user->balance += $amount;
             $user->save();
+
+            // Construct precise and highly transparent transaction details
+            if ($payment->monthly_percentage > 0) {
+                if ($payment->selected_month === 'all') {
+                    $monthLabel = $now->format('F Y');
+                } else {
+                    $monthLabel = \Carbon\Carbon::parse($payment->selected_month)->format('F Y');
+                }
+                $details = "Plan ROI - " . $monthLabel . ": " . $payment->description;
+            } else {
+                $details = ucfirst($payment->frequency) . ' Plan ROI (' . getAmount($payment->percentage) . '%): ' . $payment->description;
+            }
 
             $this->pushTransaction([
                 'user_id'      => $user->id,
-                'amount'       => $payment->amount,
+                'amount'       => $amount,
                 'post_balance' => $user->balance,
                 'trx_type'     => '+',
-                'details'      => ucfirst($payment->frequency) . ' Plan Payment: ' . $payment->description,
+                'details'      => $details,
                 'remark'       => 'manual_payment',
             ]);
 
-            $this->info("✅ Credited ₹{$payment->amount} to user {$user->username} (Plan ID: {$payment->plan_id})");
+            $this->info("✅ Credited " . gs()->cur_sym . "{$amount} to user {$user->username} (ROI)");
         }
 
         $payment->last_credited_at = now();

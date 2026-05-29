@@ -128,10 +128,25 @@ class WithdrawalController extends Controller
         $withdraw->save();
 
         $user = $withdraw->user;
-        $user->balance += $withdraw->amount;
+        if ($withdraw->withdraw_type == 2) {
+            $user->invest_amount += $withdraw->amount;
+            if ($user->plan_id === null) {
+                $latestPlanTrx = Transaction::where('user_id', $user->id)
+                    ->where('remark', 'like', '%plan_purchase%')
+                    ->orderBy('id', 'desc')
+                    ->first();
+                if ($latestPlanTrx && preg_match('/(.*?) investment made/i', $latestPlanTrx->details, $matches)) {
+                    $planName = trim($matches[1]);
+                    $plan = \App\Models\Plan::where('name', $planName)->first();
+                    if ($plan) {
+                        $user->plan_id = $plan->id;
+                    }
+                }
+            }
+        } else {
+            $user->balance += $withdraw->amount;
+        }
         $user->save();
-
-
 
         $transaction = new Transaction();
         $transaction->user_id = $withdraw->user_id;
@@ -139,8 +154,13 @@ class WithdrawalController extends Controller
         $transaction->post_balance = $user->balance;
         $transaction->charge = 0;
         $transaction->trx_type = '+';
-        $transaction->remark = 'withdraw_reject';
-        $transaction->details = showAmount($withdraw->amount) . ' ' . $general->cur_text . ' Refunded from withdrawal rejection';
+        if ($withdraw->withdraw_type == 2) {
+            $transaction->remark = 'investment_withdraw_reject';
+            $transaction->details = showAmount($withdraw->amount) . ' ' . $general->cur_text . ' Refunded to investment from withdrawal rejection';
+        } else {
+            $transaction->remark = 'withdraw_reject';
+            $transaction->details = showAmount($withdraw->amount) . ' ' . $general->cur_text . ' Refunded from withdrawal rejection';
+        }
         $transaction->trx = $withdraw->trx;
         $transaction->save();
 

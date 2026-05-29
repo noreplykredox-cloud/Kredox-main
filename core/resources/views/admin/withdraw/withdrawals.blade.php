@@ -44,6 +44,7 @@
                                 <th>@lang('Initiated')</th>
                                 <th>@lang('User')</th>
                                 <th>@lang('Amount')</th>
+                                <th>@lang('Wallet')</th>
                                 <th>@lang('Conversion')</th>
                                 <th>@lang('Status')</th>
                                 <th>@lang('Action')</th>
@@ -86,6 +87,14 @@
                                     {{ showAmount($withdraw->amount-$withdraw->charge) }} {{ __($general->cur_text) }}
                                     </strong>
 
+                                </td>
+
+                                <td>
+                                    @if($withdraw->withdraw_type == 2)
+                                        <span class="badge badge--warning">@lang('Investment')</span>
+                                    @else
+                                        <span class="badge badge--primary">@lang('Balance')</span>
+                                    @endif
                                 </td>
 
                                 <td>

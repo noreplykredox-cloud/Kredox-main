@@ -17,74 +17,126 @@ class ProcessDailyReferralPayout extends Command
     protected array $transactions = [];
 
     public function handle()
-  {
-      $this->trx = getTrx();
-      $yesterday = Carbon::yesterday()->toDateString();
+    {
+        $this->trx = getTrx();
+        $now = Carbon::now();
 
-      $this->info("Running daily referral payout for date: $yesterday");
+        $this->info("Running daily referral payout command...");
 
-      // Get users who received any eligible payment yesterday
-      $downlineUsers = User::whereHas('transactions', function ($q) use ($yesterday) {
-              $q->whereDate('created_at', $yesterday)
-                ->where(function ($query) {
-                    $query->where('remark', 'like', '%manual_payment%')
-                        ->orWhere('remark', 'like', 'daily_referral')
-                        ->orWhere('remark', 'like', '%level%commission%')
-                        ->orWhere('remark', 'like', '%referral_commission%');
-                });
-          })
-          ->get();
+        // Scan downline ROI transactions from the last 7 days to process any pending daily referrals
+        $targetStartDate = Carbon::now()->subDays(7)->startOfDay();
 
-      if ($downlineUsers->isEmpty()) {
-          $this->warn("No users found with valid transactions on $yesterday.");
-          return Command::SUCCESS;
-      }
+        $roiTransactions = Transaction::where('remark', 'manual_payment')
+            ->where('details', 'like', '%Plan ROI%')
+            ->where('created_at', '>=', $targetStartDate)
+            ->orderBy('id', 'asc')
+            ->get();
 
-      foreach ($downlineUsers as $user) {
-          // Sum all eligible earnings for the user
-          $earned = Transaction::where('user_id', $user->id)
-              ->whereDate('created_at', $yesterday)
-              ->where(function ($query) {
-                  $query->where('remark', 'like', '%manual_payment%')
-                      ->orWhere('remark', 'like', 'daily_referral')
-                      ->orWhere('remark', 'like', '%level%commission%')
-                      ->orWhere('remark', 'like', '%referral_commission%');
-              })
-              ->sum('amount');
+        if ($roiTransactions->isEmpty()) {
+            $this->warn("No eligible downline Plan ROI transactions found in the last 7 days.");
+            return Command::SUCCESS;
+        }
 
-          if ($earned <= 0) continue;
+        $this->info("Found " . $roiTransactions->count() . " ROI transactions to check.");
 
-          $uplines = $this->getUplineUsers($user);
+        foreach ($roiTransactions as $trx) {
+            $downlineUser = User::find($trx->user_id);
+            if (!$downlineUser) continue;
 
-          foreach ($uplines as $level => $upline) {
-              if (!$upline->plan_id) continue;
+            $uplines = $this->getUplineUsers($downlineUser);
 
-              $referralPercent = DailyReferralLevel::where('plan_id', $user->plan_id)
-                  ->where('level', $level + 1)
-                  ->value('percentage');
+            foreach ($uplines as $level => $upline) {
+                // Check if upline has an active investment
+                if ($upline->invest_amount <= 0) continue;
 
-              if ($referralPercent && $referralPercent > 0) {
-                  $bonus = ($earned * $referralPercent) / 100;
-                  $upline->balance += $bonus;
-                  $upline->save();
+                // Check if Daily Referral Payout is active for this upline's plan
+                $plan = $upline->plan;
+                if (!$plan || !$plan->daily_referral_enabled) continue;
 
-                  $this->pushTransaction([
-                      'user_id'      => $upline->id,
-                      'amount'       => $bonus,
-                      'post_balance' => $upline->balance,
-                      'trx_type'     => '+',
-                      'details'      => "Daily Referral Bonus from {$user->username} (Level " . ($level + 1) . ")",
-                      'remark'       => 'daily_referral',
-                  ]);
+                // Check plan-specific start time for daily referral payouts
+                if ($plan->daily_referral_start_time) {
+                    $startTime = Carbon::parse($plan->daily_referral_start_time);
+                    if ($startTime->gt($now)) {
+                        $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because daily referral start time is in the future.");
+                        continue;
+                    }
 
-                  $this->info("Credited {$bonus} to {$upline->username} from {$user->username} at Level " . ($level + 1));
-              }
-          }
-      }
+                    // Scheduled time for this specific transaction on its day of creation
+                    $trxDate = Carbon::parse($trx->created_at);
+                    $scheduledTime = Carbon::parse($trxDate->toDateString() . ' ' . $startTime->toTimeString());
 
-      $this->storeTransactions();
-      return Command::SUCCESS;
-  }
+                    if ($now->lt($scheduledTime)) {
+                        $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because scheduled time for this transaction (" . $scheduledTime->format('Y-m-d g:i A') . ") has not been reached yet.");
+                        continue;
+                    }
+                }
+
+                // Check plan-specific weekend exclusion
+                if ($plan->daily_referral_exclude_weekends && $now->isWeekend()) {
+                    $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because today is a weekend and the plan excludes weekends.");
+                    continue;
+                }
+
+                // Check if this upline has already been paid today for this downline and level
+                $alreadyPaidToday = Transaction::where('user_id', $upline->id)
+                    ->where('remark', 'daily_referral')
+                    ->where('details', 'like', "Level Income {$downlineUser->username} (Level " . ($level + 1) . ")%")
+                    ->whereDate('created_at', Carbon::today())
+                    ->exists();
+
+                if ($alreadyPaidToday) {
+                    $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because they were already paid today for downline {$downlineUser->username}.");
+                    continue;
+                }
+
+                // Check if this specific downline transaction was already processed for this upline
+                $refDetails = "Ref Trx #{$trx->id}";
+                $alreadyPaid = Transaction::where('user_id', $upline->id)
+                    ->where('remark', 'daily_referral')
+                    ->where('details', 'like', "%{$refDetails}%")
+                    ->exists();
+
+                if ($alreadyPaid) {
+                    continue;
+                }
+
+                // Condition: To receive Level N income, the upline must have at least N direct referrals
+                $requiredDirects = $level + 1;
+                $directsCount = User::where('ref_by', $upline->id)->count();
+
+                if ($directsCount < $requiredDirects) {
+                    $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because they have {$directsCount} directs (requires {$requiredDirects}).");
+                    continue;
+                }
+
+                $referralPercent = DailyReferralLevel::where('plan_id', $upline->plan_id)
+                    ->where('level', $level + 1)
+                    ->value('percentage');
+
+                if ($referralPercent && $referralPercent > 0) {
+                    $bonus = ($trx->amount * $referralPercent) / 100;
+                    if ($bonus <= 0) continue;
+
+                    $upline->balance += $bonus;
+                    $upline->save();
+
+                    $this->pushTransaction([
+                        'user_id'      => $upline->id,
+                        'amount'       => $bonus,
+                        'post_balance' => $upline->balance,
+                        'trx_type'     => '+',
+                        'details'      => "Level Income {$downlineUser->username} (Level " . ($level + 1) . ") - {$refDetails}",
+                        'remark'       => 'daily_referral',
+                    ]);
+
+                    $this->info("✅ Credited {$bonus} to {$upline->username} from {$downlineUser->username} at Level " . ($level + 1) . " for Trx #{$trx->id}");
+                }
+            }
+        }
+
+        $this->storeTransactions();
+        return Command::SUCCESS;
+    }
 
     private function getUplineUsers($user)
     {

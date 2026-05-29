@@ -81,7 +81,7 @@ Add this to the end of your shell configuration file (e.g. <info>"{$rcFile}"</>)
     <info>eval "$({$fullCommand} completion {$shell})"</>
 EOH
             )
-            ->addArgument('shell', InputArgument::OPTIONAL, 'The shell type (e.g. "bash"), the value of the "$SHELL" env var will be used if this is not given', null, $this->getSupportedShells(...))
+            ->addArgument('shell', InputArgument::OPTIONAL, 'The shell type (e.g. "bash"), the value of the "$SHELL" env var will be used if this is not given', null, [$this, 'getSupportedShells'])
             ->addOption('debug', null, InputOption::VALUE_NONE, 'Tail the completion debug log')
         ;
     }

@@ -44,6 +44,43 @@ class ProfileController extends Controller
         return back()->withNotify($notify);
     }
 
+    public function submitProfilePhoto(Request $request)
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpeg,png,jpg', 'max:2048']
+        ]);
+        
+        $user = auth()->user();
+        if ($request->hasFile('image')) {
+            try {
+                $old = $user->image;
+                $user->image = fileUploader($request->image, getFilePath('userProfile'), getFileSize('userProfile'), $old);
+            } catch (\Exception $exp) {
+                $notify[] = ['error', 'Couldn\'t upload your image: ' . $exp->getMessage()];
+                return back()->withNotify($notify);
+            }
+        }
+        $user->save();
+        
+        $notify[] = ['success', 'Profile photo uploaded successfully'];
+        return back()->withNotify($notify);
+    }
+
+    public function removeProfilePhoto()
+    {
+        $user = auth()->user();
+        if ($user->image) {
+            $path = getFilePath('userProfile') . '/' . $user->image;
+            fileManager()->removeFile($path);
+            $user->image = null;
+            $user->save();
+            $notify[] = ['success', 'Profile photo removed successfully'];
+        } else {
+            $notify[] = ['error', 'No profile photo found'];
+        }
+        return back()->withNotify($notify);
+    }
+
     public function changePassword()
     {
         $pageTitle = 'Change Password';

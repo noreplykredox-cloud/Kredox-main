@@ -12,7 +12,7 @@
         <div class="row justify-content-center mb-30-none">
             @foreach ($elements as $element)
                 <div class="col-md-6 col-xl-4 col-sm-10">
-                    <div class="post-item"> 
+                    <div class="post-item">
                         <div class="post-thumb c-thumb">
                             <a href="{{ route('blog.details', [$element->id, slug($element->data_values->title)]) }}">
                                 <img src="{{ getImage('assets/images/frontend/blog/thumb_' . @$element->data_values->blog_image, '370x275') }}"

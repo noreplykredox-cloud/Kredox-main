@@ -77,6 +77,13 @@
                                                         <span class="input-group-text">%</span>
                                                     </div>
                                                 </div>
+                                                <div class="form-group">
+                                                    <label>@lang('Investment Percent Charge')</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" name="investment_charge" value="{{ getAmount($method->investment_charge) }}" required>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

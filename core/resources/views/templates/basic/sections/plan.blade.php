@@ -26,7 +26,7 @@
                         </div>
                         <ul class="plan-info">
                             <li>
-                                <h6 class="direct">@lang('Direct Referral Bonus') :
+                                <h6 class="direct">@lang('Direct Income Bonus') :
                                     {{ $general->cur_sym }}{{ getAmount($plan->referral_bonus) }}</h6>
                             </li>
 

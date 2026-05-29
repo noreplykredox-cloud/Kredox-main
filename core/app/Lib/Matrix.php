@@ -41,6 +41,14 @@ class Matrix
 
 
     /**
+    * Investment amount
+    *
+    * @var decimal
+    */
+    private $amount;
+
+
+    /**
     * All transactions data of this process
     *
     * @var array
@@ -61,14 +69,16 @@ class Matrix
     *
     * @param object $user
     * @param object $plan
+    * @param decimal $amount
     *
     * @return void
     */
-    public function __construct($user,$plan)
+    public function __construct($user,$plan,$amount)
     {
         $general = gs();
         $this->user = $user;
         $this->plan = $plan;
+        $this->amount = $amount;
         $this->height = $general->matrix_height;
         $this->width = $general->matrix_width;
         $this->trx = getTrx();
@@ -78,7 +88,7 @@ class Matrix
     }
 
     /**
-     * Purchase user plan
+     * Purchase user plan (Investment)
      *
      * @return void;
      */
@@ -86,21 +96,21 @@ class Matrix
     {
         $user = $this->user;
         $plan = $this->plan;
-        $user->plan_id = $plan->id;
-        //dd($user);
-        $user->save();
+        $amount = $this->amount;
 
-        $user->balance -= $plan->price;
+        $user->plan_id = $plan->id;
+        $user->invest_amount += $amount;
+        $user->balance -= $amount;
         $user->save();
 
         //push to transactions
         $this->pushTransaction([
             'user_id'=>$user->id,
             'ref_by'=>$user->ref_by,
-            'amount'=>$plan->price,
+            'amount'=>$amount,
             'post_balance'=>$user->balance,
             'trx_type'=>'-',
-            'details'=>$plan->name.' plan purchase',
+            'details'=>$plan->name.' investment made',
             'remark'=>'plan_purchase'
         ]);
 
@@ -109,13 +119,17 @@ class Matrix
         $this->levelCommission();
         $this->storeTransactions();
 
-        notify($user, 'PLAN_PURCHASED', [
-            'currency' => gs()->cur_text,
-            'trx' => $this->trx,
-            'price' => showAmount($plan->price),
-            'plan_name' =>  $plan->name,
-            'post_balance' => showAmount($user->balance),
-        ]);
+        try {
+            notify($user, 'PLAN_PURCHASED', [
+                'currency' => gs()->cur_text,
+                'trx' => $this->trx,
+                'price' => showAmount($amount),
+                'plan_name' =>  $plan->name,
+                'post_balance' => showAmount($user->balance),
+            ]);
+        } catch (\Exception $e) {
+            // Silently fail notification to ensure investment completes
+        }
     }
 
     /**
@@ -125,7 +139,7 @@ class Matrix
      */
     public function getPosition()
     {
-        if (!$this->user->ref_by){
+        if (!$this->user->ref_by || $this->user->position_id){
             return false;
         }
 
@@ -143,7 +157,7 @@ class Matrix
             return true;
         }
 
-        for ($level=1; $level < 100000 ; $level++) {
+        for ($level=1; $level < 100 ; $level++) {
 
             $myref = $this->showPositionBelow($referral->id);
 
@@ -210,23 +224,25 @@ class Matrix
         $user = $this->user;
         $referral = $user->referral;
         $plan = $this->plan;
-        if ($referral) {
-            $referral->balance += $plan->referral_bonus;
+        
+        if ($referral && $plan->referral_percentage > 0) {
+            $bonus = ($this->amount * $plan->referral_percentage / 100);
+            $referral->balance += $bonus;
             $referral->save();
 
             //Push to transactions
             $this->pushTransaction([
                 'user_id'=>$referral->id,
                 'ref_by'=>$referral->ref_by,
-                'amount'=> showAmount($plan->referral_bonus),
+                'amount'=> showAmount($bonus),
                 'post_balance'=> showAmount($referral->balance),
                 'trx_type'=>'+',
                 'remark'=>'referral_commission',
-                'details'=>'Referral commission from '.$user->username,
+                'details'=>'Direct Income from '.$user->username.' ('.showAmount($this->amount).' '.gs()->cur_text.' Invested)',
             ]);
 
             notify($referral, 'REFERRAL_COMMISSION', [
-                'amount' => showAmount($plan->referral_bonus),
+                'amount' => showAmount($bonus),
                 'username' => $user->username,
                 'currency' => gs()->cur_text,
                 'trx' => $this->trx,
@@ -248,11 +264,11 @@ class Matrix
         }
 
         $user = $this->user;
-        $commissions = $this->plan->level;
+        $levels = $this->plan->level;
 
         for ($i = 0; $i < $this->height; $i++) {
-            $commission = @$commissions[$i];
-            if (!$commission) {
+            $levelInfo = @$levels[$i];
+            if (!$levelInfo || $levelInfo->percentage <= 0) {
                 break;
             }
 
@@ -269,17 +285,18 @@ class Matrix
                 continue; // Skip commission if not enough direct referrals
             }
 
-            $upper->balance += $commission->amount;
+            $bonus = ($this->amount * $levelInfo->percentage / 100);
+            $upper->balance += $bonus;
             $upper->save();
 
             $this->pushTransaction([
                 'user_id' => $upper->id,
                 'ref_by' => $upper->ref_by,
-                'amount' => showAmount($commission->amount),
+                'amount' => showAmount($bonus),
                 'post_balance' => showAmount($upper->balance),
                 'trx_type' => '+',
                 'remark' => 'level_commission',
-                'details' => 'Level ' . ($i + 1) . ' commission from ' . $user->username,
+                'details' => 'Level ' . ($i + 1) . ' Income from ' . $user->username.' ('.showAmount($this->amount).' '.gs()->cur_text.' Invested)',
             ]);
 
             $user = $upper; // Move to next level up
@@ -326,24 +343,20 @@ class Matrix
     * @return void
     */
     private function getException(){
-        // if ($this->user->plan) {
-        //     $message = 'You can\'t buy plan twice';
-        //     $this->throwException($message);
-        // }
-
-        if ($this->user->balance < $this->plan->price) {
-            $message = 'You don\'t have sufficient balance';
+        if ($this->amount < $this->plan->minimum_investment) {
+            $message = 'Minimum investment for this plan is ' . showAmount($this->plan->minimum_investment) . ' ' . gs()->cur_text;
             $this->throwException($message);
         }
 
-        // $referral = $this->user->referral;
+        if ($this->plan->maximum_investment > 0 && $this->amount > $this->plan->maximum_investment) {
+            $message = 'Maximum investment for this plan is ' . showAmount($this->plan->maximum_investment) . ' ' . gs()->cur_text;
+            $this->throwException($message);
+        }
 
-        // if($referral){
-        //     if($referral->plan_id != $this->plan->id){
-        //         $message = 'You have to purchase a plan which have purchased your referrer';
-        //         $this->throwException($message);
-        //     }
-        // }
+        if ($this->user->balance < $this->amount) {
+            $message = 'You don\'t have sufficient balance';
+            $this->throwException($message);
+        }
     }
 
     /**

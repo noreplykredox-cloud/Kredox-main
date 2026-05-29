@@ -123,24 +123,9 @@ class FileManager
     * @return void
     */
 	protected function uploadImage(){
-		$image = Image::make($this->file);
-
-        //resize the
-	    if ($this->size) {
-	        $size = explode('x', strtolower($this->size));
-	        $image->resize($size[0], $size[1]);
-	    }
-        //save the image
-	    $image->save($this->path . '/' . $this->filename);
-
-        //save the image as thumbnail version
-	    if ($this->thumb) {
-            if ($this->old) {
-                $this->removeFile($this->path . '/thumb_' . $this->old);
-            }
-	        $thumb = explode('x', $this->thumb);
-	        Image::make($this->file)->resize($thumb[0], $thumb[1])->save($this->path . '/thumb_' . $this->filename);
-	    }
+        // Bypass Intervention\Image resizing completely because GD Library is not available on this server setup
+        // Directly upload the file as if it were a normal file without resizing
+        $this->uploadFile();
 	}
 
 

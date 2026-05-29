@@ -260,7 +260,7 @@
                     </div>
                 </div>
             </div>
-        </div><!-- dashboard-w1 end -->
+        </div>
         <div class="col-xxl-3 col-sm-6">
             <div class="card bg--success has-link box--shadow2">
                 <a href="{{route('admin.pin.used')}}" class="item-link"></a>

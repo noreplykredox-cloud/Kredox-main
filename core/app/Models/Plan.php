@@ -21,12 +21,17 @@ class Plan extends Model
         return $this->hasMany(DailyReferralLevel::class);
     }
 
-    public function sumLevelOfCommission($planId)
+    public function sumLevelOfCommission($planId, $amount = 0)
     {
         $general = gs();
-        return Level::where('plan_id', $planId)
+        $totalPercentage = Level::where('plan_id', $planId)
                     ->where('level', '<=', $general->matrix_height)
-                    ->sum('amount');
+                    ->sum('percentage');
+        
+        if ($amount > 0) {
+            return ($amount * $totalPercentage / 100);
+        }
+        return $totalPercentage;
     }
 
     public function totalLevel($planId)

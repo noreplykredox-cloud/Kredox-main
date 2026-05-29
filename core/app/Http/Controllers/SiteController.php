@@ -20,8 +20,17 @@ class SiteController extends Controller
     public function index()
     {
 
-        $reference = @$_GET['reference'];
+        $reference = @$_GET['reference'] ?: @$_GET['node'];
         if ($reference) {
+            if (strpos($reference, 'NODE_') === 0) {
+                $hex = substr($reference, 5);
+                if (preg_match('/^[0-9a-fA-F]+$/', $hex)) {
+                    $decoded = @hex2bin($hex);
+                    if ($decoded) {
+                        $reference = $decoded;
+                    }
+                }
+            }
             session()->put('reference', $reference);
         }
 
@@ -89,6 +98,13 @@ class SiteController extends Controller
         $message->save();
 
         $notify[] = ['success', 'Ticket created successfully!'];
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Your message has been transmitted successfully to our elite support team.',
+            ]);
+        }
 
         return to_route('ticket.view', [$ticket->ticket])->withNotify($notify);
     }

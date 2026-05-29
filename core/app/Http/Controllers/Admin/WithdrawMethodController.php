@@ -32,6 +32,7 @@ class WithdrawMethodController extends Controller
             'max_limit' => 'required|numeric|gt:min_limit',
             'fixed_charge' => 'required|numeric|gte:0',
             'percent_charge' => 'required|numeric|between:0,100',
+            'investment_charge' => 'required|numeric|between:0,100',
             'instruction' => 'required',
         ];
 
@@ -51,6 +52,7 @@ class WithdrawMethodController extends Controller
         $method->max_limit = $request->max_limit;
         $method->fixed_charge = $request->fixed_charge;
         $method->percent_charge = $request->percent_charge;
+        $method->investment_charge = $request->investment_charge;
         $method->currency = $request->currency;
         $method->description = $request->instruction;
         $method->save();
@@ -77,6 +79,7 @@ class WithdrawMethodController extends Controller
             'max_limit'      => 'required|numeric|gt:min_limit',
             'fixed_charge'   => 'required|numeric|gte:0',
             'percent_charge' => 'required|numeric|between:0,100',
+            'investment_charge' => 'required|numeric|between:0,100',
             'currency'       => 'required',
             'instruction'    => 'required'
         ];
@@ -96,6 +99,7 @@ class WithdrawMethodController extends Controller
         $method->max_limit      = $request->max_limit;
         $method->fixed_charge   = $request->fixed_charge;
         $method->percent_charge = $request->percent_charge;
+        $method->investment_charge = $request->investment_charge;
         $method->description    = $request->instruction;
         $method->currency       = $request->currency;
         $method->save();

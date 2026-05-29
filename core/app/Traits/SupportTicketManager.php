@@ -24,7 +24,7 @@ trait SupportTicketManager
         if (!$user) {
             abort(404);
         }
-        $pageTitle = "Support Tickets";
+        $pageTitle = "Support Messenger";
         $supports = SupportTicket::where($this->column, $user->id)->orderBy('id', 'desc')->paginate(getPaginate());
         return view($this->activeTemplate . $this->userType . '.support.index', compact('supports', 'pageTitle'));
     }
@@ -36,7 +36,7 @@ trait SupportTicketManager
         if (!$user) {
             return to_route('home');
         }
-        $pageTitle = "Open Ticket";
+        $pageTitle = "New Conversation";
         return view($this->activeTemplate . $this->userType . '.support.create', compact('pageTitle', 'user'));
     }
 
@@ -77,6 +77,13 @@ trait SupportTicketManager
 
         $notify[] = ['success', 'Ticket opened successfully!'];
 
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ticket opened successfully!',
+                'ticket_id' => $ticket->ticket
+            ]);
+        }
 
         return to_route($this->redirectLink, $ticket->ticket)->withNotify($notify);
     }
@@ -85,7 +92,7 @@ trait SupportTicketManager
     {
         $user      = $this->user;
         $column    = $this->column;
-        $pageTitle = "View Ticket";
+        $pageTitle = "Messenger Chat";
         $userId    = 0;
         $layout    = $this->layout;
 
@@ -100,9 +107,10 @@ trait SupportTicketManager
         }
 
         $myTicket = SupportTicket::where('ticket', $ticket)->where($this->column, $userId)->orderBy('id', 'desc')->firstOrFail();
-        $messages = SupportMessage::where('support_ticket_id', $myTicket->id)->with('ticket', 'admin', 'attachments')->orderBy('id', 'desc')->get();
+        $messages = SupportMessage::where('support_ticket_id', $myTicket->id)->with('ticket', 'admin', 'attachments')->orderBy('id', 'asc')->get();
 
-        return view($this->activeTemplate . $this->userType . '.support.view', compact('myTicket', 'messages', 'pageTitle', 'user', 'layout'));
+        return view($this->activeTemplate . $this->userType . '.support.view', compact('myTicket', 'messages', 'pageTitle', 'user', 'layout'))
+               ->with('is_ajax', request()->ajax());
     }
 
 
@@ -157,6 +165,13 @@ trait SupportTicketManager
 
 
         $notify[] = ['success', 'Support ticket replied successfully!'];
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Support ticket replied successfully!'
+            ]);
+        }
 
         return back()->withNotify($notify);
     }

@@ -16,10 +16,11 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // Run manual payments every minute
-        $schedule->command('manual:payments')->everyMinute();
+         // Run manual payments every minute
+    $schedule->command('manual:payments')->everyMinute();
 
-        // Run daily referral payout at 12:30 AM
-        $schedule->command('payout:daily-referral')->dailyAt('00:30');
+    // Run daily referral payout every minute
+    $schedule->command('payout:daily-referral')->everyMinute();
     }
 
     /**

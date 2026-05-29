@@ -56,9 +56,10 @@ class LoginController extends Controller
 
         $this->validateLogin($request);
 
-        $request->session()->regenerateToken();
-
         if(!verifyCaptcha()){
+            if ($request->ajax()) {
+                return response()->json(['status' => 'error', 'message' => 'Invalid captcha provided'], 422);
+            }
             $notify[] = ['error','Invalid captcha provided'];
             return back()->withNotify($notify);
         }
@@ -81,6 +82,9 @@ class LoginController extends Controller
         // user surpasses their maximum number of attempts they will get locked out.
         $this->incrementLoginAttempts($request);
 
+        if ($request->ajax()) {
+            return response()->json(['status' => 'error', 'message' => 'Invalid username or password'], 401);
+        }
 
         return $this->sendFailedLoginResponse($request);
     }

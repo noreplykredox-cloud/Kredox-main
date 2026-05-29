@@ -111,9 +111,10 @@ if (!$color OR !checkhexcolor($color)) {
 }
 
 .badge--base, .bg--base, .deposit-table thead tr {
-    background-color: <?php echo $color ?> !important;
+    background-color: #9e0707 !important;
 }
 
 .form-control.referral-input[readonly]{
-    background: -webkit-linear-gradient(-90deg, #124656 0%, #063a4a 45%, #063b46 100%)!important;
+background: linear-gradient(rgb(2 3 4 / 41%), rgb(0 0 0 / 21%), rgb(0 0 0 / 20%)), url(https://www.shutterstock.com/image-vector/forex-gold-trading-background-glowing-600nw-2568230757.jpg) !important;
+border: 2px solid #8e8a2d !important;
 }

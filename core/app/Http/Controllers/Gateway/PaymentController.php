@@ -64,6 +64,19 @@ class PaymentController extends Controller
         $data->trx = getTrx();
         $data->save();
         session()->put('Track', $data->trx);
+        
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'track' => $data->trx,
+                'deposit' => $data,
+                'method_name' => $gate->name,
+                'gateway_crypto' => $gate->method->crypto,
+                'gateway_description' => $gate->method->description,
+                'form_id' => $gate->method->form_id
+            ]);
+        }
+
         return to_route('user.deposit.confirm');
     }
 
@@ -205,6 +218,13 @@ class PaymentController extends Controller
             'rate' => showAmount($data->rate),
             'trx' => $data->trx
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Your deposit request has been taken'
+            ]);
+        }
 
         $notify[] = ['success', 'You have deposit request has been taken'];
         return to_route('user.deposit.history')->withNotify($notify);

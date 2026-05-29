@@ -26,18 +26,25 @@ class PlanController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'price' => 'required|numeric|gt:0',
-            'referral_bonus' => 'required|numeric|gt:0',
+            'minimum_investment' => 'required|numeric|min:0',
+            'maximum_investment' => 'required|numeric|gt:minimum_investment',
+            'referral_percentage' => 'required|numeric|between:0,100',
             'level' => 'required|array',
-            'level.*' => 'numeric|min:0',
+            'level.*' => 'numeric|between:0,100',
+            'daily_referral_start_time' => 'nullable|date',
+            'daily_referral_exclude_weekends' => 'nullable|integer|in:0,1',
         ]);
 
         $plan = new Plan();
         $plan->name = $request->name;
-        $plan->price = $request->price;
-        $plan->referral_bonus = $request->referral_bonus;
+        $plan->minimum_investment = $request->minimum_investment;
+        $plan->maximum_investment = $request->maximum_investment;
+        $plan->referral_percentage = $request->referral_percentage;
         $plan->daily_referral_enabled = $request->daily_referral_enabled ?? 0;
+        $plan->daily_referral_start_time = $request->daily_referral_start_time;
+        $plan->daily_referral_exclude_weekends = $request->has('daily_referral_exclude_weekends') ? 1 : 0;
         $plan->is_level_commission = $request->is_level_commission ?? 0;
+        $plan->require_otp = $request->has('require_otp') ? 1 : 0;
         $plan->save();
 
         $this->levelUpdate($request, $plan);
@@ -62,18 +69,25 @@ class PlanController extends Controller
     {
         $request->validate([
             'name' => 'required',
-            'price' => 'required|numeric|gt:0',
-            'referral_bonus' => 'required|numeric|gt:0',
+            'minimum_investment' => 'required|numeric|min:0',
+            'maximum_investment' => 'required|numeric|gt:minimum_investment',
+            'referral_percentage' => 'required|numeric|between:0,100',
             'level' => 'required|array',
-            'level.*' => 'numeric|min:0',
+            'level.*' => 'numeric|between:0,100',
+            'daily_referral_start_time' => 'nullable|date',
+            'daily_referral_exclude_weekends' => 'nullable|integer|in:0,1',
         ]);
 
         $plan = Plan::findOrFail($id);
         $plan->name = $request->name;
-        $plan->price = $request->price;
-        $plan->referral_bonus = $request->referral_bonus;
+        $plan->minimum_investment = $request->minimum_investment;
+        $plan->maximum_investment = $request->maximum_investment;
+        $plan->referral_percentage = $request->referral_percentage;
         $plan->daily_referral_enabled = $request->daily_referral_enabled ?? 0;
+        $plan->daily_referral_start_time = $request->daily_referral_start_time;
+        $plan->daily_referral_exclude_weekends = $request->has('daily_referral_exclude_weekends') ? 1 : 0;
         $plan->is_level_commission = $request->is_level_commission ?? 0;
+        $plan->require_otp = $request->has('require_otp') ? 1 : 0;
         $plan->save();
 
         $this->levelUpdate($request, $plan);
@@ -86,11 +100,11 @@ class PlanController extends Controller
     private function levelUpdate($request, $plan)
     {
         Level::where('plan_id', $plan->id)->delete();
-        foreach ($request->level as $level => $amount) {
+        foreach ($request->level as $level => $percent) {
             Level::create([
                 'plan_id' => $plan->id,
                 'level' => $level,
-                'amount' => $amount,
+                'percentage' => $percent,
             ]);
         }
     }
@@ -119,29 +133,67 @@ class PlanController extends Controller
             $entry = (object) $entry;
 
             // Skip incomplete rows
-            if (!isset($entry->amount, $entry->description, $entry->start_time, $entry->frequency)) continue;
+            if (!isset($entry->description, $entry->start_time, $entry->frequency)) continue;
+
+            $frequency = $entry->frequency;
+            $percentage = isset($entry->percentage) ? floatval($entry->percentage) : 0;
+            $monthlyDay = null;
+            $excludeWeekends = 0;
+            $selectedMonth = null;
+            $monthlyPercentage = null;
+
+            if ($frequency === 'monthly_target') {
+                $frequency = 'daily';
+                $selectedMonth = $entry->selected_month ?? null;
+                $monthlyPercentage = isset($entry->monthly_percentage) ? floatval($entry->monthly_percentage) : 0;
+                $excludeWeekends = isset($entry->exclude_weekends) ? intval($entry->exclude_weekends) : 0;
+
+                if ($selectedMonth && $monthlyPercentage > 0) {
+                    $calcMonth = ($selectedMonth === 'all') ? now()->format('Y-m') : $selectedMonth;
+                    $carbonMonth = \Carbon\Carbon::createFromFormat('Y-m', $calcMonth);
+                    $totalDays = $carbonMonth->daysInMonth;
+                    $workingDays = 0;
+
+                    if ($excludeWeekends) {
+                        $tempDate = $carbonMonth->copy()->startOfMonth();
+                        $endDate = $carbonMonth->copy()->endOfMonth();
+                        while ($tempDate->lte($endDate)) {
+                            if (!$tempDate->isWeekend()) {
+                                $workingDays++;
+                            }
+                            $tempDate->addDay();
+                        }
+                        $daysCount = $workingDays;
+                    } else {
+                        $daysCount = $totalDays;
+                    }
+
+                    $percentage = $daysCount > 0 ? ($monthlyPercentage / $daysCount) : 0;
+                }
+            } elseif ($frequency === 'monthly') {
+                $monthlyDay = $entry->monthly_day ?? null;
+            }
+
+            $data = [
+                'percentage' => $percentage,
+                'description' => $entry->description,
+                'start_time' => $entry->start_time,
+                'frequency' => $frequency,
+                'monthly_day' => $monthlyDay,
+                'exclude_weekends' => $excludeWeekends,
+                'selected_month' => $selectedMonth,
+                'monthly_percentage' => $monthlyPercentage,
+            ];
 
             if (!empty($entry->id)) {
                 // UPDATE existing
-                ManualPayment::where('id', $entry->id)->update([
-                    'amount' => $entry->amount,
-                    'description' => $entry->description,
-                    'start_time' => $entry->start_time,
-                    'frequency' => $entry->frequency,
-                    'monthly_day' => $entry->frequency === 'monthly' ? ($entry->monthly_day ?? null) : null,
-                ]);
+                ManualPayment::where('id', $entry->id)->update($data);
             } else {
                 // CREATE new
-                ManualPayment::create([
-                    'plan_id' => $plan->id,
-                    'type' => 'plan',
-                    'amount' => $entry->amount,
-                    'description' => $entry->description,
-                    'start_time' => $entry->start_time,
-                    'frequency' => $entry->frequency,
-                    'monthly_day' => $entry->frequency === 'monthly' ? ($entry->monthly_day ?? null) : null,
-                    'status' => 'active',
-                ]);
+                $data['plan_id'] = $plan->id;
+                $data['type'] = 'plan';
+                $data['status'] = 'active';
+                ManualPayment::create($data);
             }
         }
     }
@@ -156,6 +208,21 @@ class PlanController extends Controller
     public function status($id)
     {
         return Plan::changeStatus($id);
+    }
+
+    public function delete($id)
+    {
+        $plan = Plan::findOrFail($id);
+
+        // Cascade Delete related records
+        Level::where('plan_id', $plan->id)->delete();
+        ManualPayment::where('plan_id', $plan->id)->delete();
+        DailyReferralLevel::where('plan_id', $plan->id)->delete();
+
+        $plan->delete();
+
+        $notify[] = ['success', 'Investment plan and all related records deleted successfully.'];
+        return back()->withNotify($notify);
     }
 
     public function matrixSetting(Request $request)
