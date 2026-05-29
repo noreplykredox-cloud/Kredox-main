@@ -234,10 +234,7 @@
                         <p class="referral-label mb-0"><i class="fas fa-link text-danger me-2"></i> UNIQUE REFERRAL LINK</p>
                         <span class="badge-status-node"><i class="fas fa-check-circle me-1"></i> ACTIVE</span>
                     </div>
-                    <p class="node-description-text mb-3">
-                        Use this unique referral link to invite partners and grow your network. Share it to connect them
-                        directly to your 4X Elite Strategy Network and earn team commissions.
-                    </p>
+
                     <div class="referral-input-group">
                         <input type="text" name="key"
                             value="{{ route('user.register') }}?node=NODE_{{ bin2hex($username) }}"
