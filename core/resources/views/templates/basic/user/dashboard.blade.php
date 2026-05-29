@@ -411,16 +411,7 @@
                                     <p>Total business from your team</p>
                                 </div>
                             </div>
-                            <div class="team-stat">
-                                <div class="stat-icon">
-                                    <i class="fas fa-user-friends"></i>
-                                </div>
-                                <div class="stat-content">
-                                    <h4>Direct Income</h4>
-                                    <h2>${{ showAmount($trantiref) }}</h2>
-                                    <p>Earnings from direct referrals</p>
-                                </div>
-                            </div>
+
                         </div>
                         <div class="team-chart-container">
                             <!-- Trading Chart -->
@@ -500,13 +491,7 @@
                             <p>Total Earnings</p>
                         </div>
                         <div class="earnings-breakdown">
-                            <div class="breakdown-item">
-                                <div class="item-label">
-                                    <i class="fas fa-user-plus"></i>
-                                    <span>Direct Income</span>
-                                </div>
-                                <div class="item-value">${{ showAmount($trantiref) }}</div>
-                            </div>
+
                             <div class="breakdown-item">
                                 <div class="item-label">
                                     <i class="fas fa-layer-group"></i>
