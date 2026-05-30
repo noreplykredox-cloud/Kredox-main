@@ -123,6 +123,7 @@
         @media screen and (min-width: 992px) {
             .register-section {
                 overflow-y: hidden;
+                justify-content: center;
             }
         }
 
@@ -361,6 +362,7 @@
                 overflow-y: auto;
                 scrollbar-width: thin;
                 scrollbar-color: var(--light-red) rgba(0, 0, 0, 0.2);
+                margin: 0;
             }
             .register-box::-webkit-scrollbar {
                 width: 6px;
