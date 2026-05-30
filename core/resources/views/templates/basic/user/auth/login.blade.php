@@ -1,7 +1,7 @@
 @extends($activeTemplate . 'layouts.app')
 @section('panel')
     @include($activeTemplate . 'partials.header')
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -52,10 +52,12 @@
         .split-container {
             display: flex;
             height: 100vh;
-            padding-top: 80px; /* Account for fixed header */
+            padding-top: 80px;
+            /* Account for fixed header */
             position: relative;
             z-index: 1;
-            overflow: hidden; /* Prevent scrolling */
+            overflow: hidden;
+            /* Prevent scrolling */
         }
 
         .content-section {
@@ -81,7 +83,7 @@
             right: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(circle at 70% 30%, rgba(139, 0, 0, 0.1) 0%, transparent 50%),
                 radial-gradient(circle at 30% 70%, rgba(255, 0, 0, 0.05) 0%, transparent 50%);
             z-index: -1;
@@ -123,7 +125,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
+            background:
                 radial-gradient(circle at 30% 30%, rgba(255, 0, 0, 0.08) 0%, transparent 50%),
                 radial-gradient(circle at 70% 70%, rgba(139, 0, 0, 0.05) 0%, transparent 50%);
             z-index: -1;
@@ -167,7 +169,8 @@
 
         .content-wrapper {
             max-width: 600px;
-            margin: auto; /* Replaces justify-content: center to prevent clipping */
+            margin: auto;
+            /* Replaces justify-content: center to prevent clipping */
             position: relative;
             width: 100%;
         }
@@ -314,7 +317,8 @@
         .login-box {
             width: 100%;
             max-width: 420px;
-            margin: auto; /* Replaces justify-content: center to prevent clipping */
+            margin: auto;
+            /* Replaces justify-content: center to prevent clipping */
             background: var(--gradient-card);
             border-radius: 20px;
             border: 1px solid var(--border-red);
@@ -392,6 +396,10 @@
             font-family: 'Inter', sans-serif;
         }
 
+        .input-group .form-input {
+            padding-right: 45px;
+        }
+
         .form-input:focus {
             outline: none;
             border-color: var(--light-red);
@@ -402,6 +410,19 @@
             color: rgba(255, 255, 255, 0.3);
         }
 
+        /* Hide native password visibility toggle and credentials icons */
+        .form-input::-ms-reveal,
+        .form-input::-ms-clear {
+            display: none !important;
+        }
+
+        .form-input::-webkit-contacts-auto-fill-button,
+        .form-input::-webkit-credentials-auto-fill-button {
+            visibility: hidden;
+            display: none !important;
+            pointer-events: none;
+        }
+
         .input-icon {
             position: absolute;
             right: 20px;
@@ -410,6 +431,7 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: var(--transition);
+            z-index: 10;
         }
 
         .input-icon:hover {
@@ -459,7 +481,8 @@
             border-radius: 12px;
             border: 1px solid var(--border-red);
             margin-bottom: 15px;
-            transform: scale(0.85); /* Make captcha smaller */
+            transform: scale(0.85);
+            /* Make captcha smaller */
             transform-origin: center;
         }
 
@@ -595,6 +618,7 @@
                 opacity: 0;
                 transform: translateX(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -606,6 +630,7 @@
                 opacity: 0;
                 transform: translateX(50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -617,6 +642,7 @@
                 opacity: 0;
                 transform: translateY(50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -628,6 +654,7 @@
                 opacity: 0;
                 transform: translateY(-50px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -635,36 +662,48 @@
         }
 
         @keyframes pulseDivider {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4);
             }
+
             70% {
                 box-shadow: 0 0 0 15px rgba(255, 0, 0, 0);
             }
         }
 
         @keyframes bounceArrow {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateX(0);
             }
+
             50% {
                 transform: translateX(-5px);
             }
         }
 
         @keyframes float {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: translateY(0);
             }
+
             50% {
                 transform: translateY(-10px);
             }
         }
 
         @keyframes pulse {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
             }
+
             50% {
                 opacity: 0.5;
             }
@@ -678,9 +717,26 @@
         }
 
         @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-5px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(5px);
+            }
         }
 
         /* Session Indicators - Desktop Only */
@@ -731,12 +787,14 @@
                 min-height: 100vh;
                 overflow: visible;
             }
-            
+
             /* Mobile Order - Login First, Content Second */
             .login-section {
-                order: 1 !important; /* Mobile: Login first */
+                order: 1 !important;
+                /* Mobile: Login first */
                 min-height: 100vh;
-                padding-top: 100px; /* Space for mobile header */
+                padding-top: 100px;
+                /* Space for mobile header */
                 border: none;
                 border-bottom: 2px solid var(--border-red);
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
@@ -746,13 +804,14 @@
                 animation: slideInDown 0.8s ease;
                 overflow-y: auto;
             }
-            
+
             .login-section::after {
                 display: none;
             }
-            
+
             .content-section {
-                order: 2 !important; /* Mobile: Content second */
+                order: 2 !important;
+                /* Mobile: Content second */
                 min-height: 100vh;
                 border: none;
                 border-top: 2px solid var(--border-red);
@@ -760,15 +819,15 @@
                 padding: 40px 20px;
                 animation: slideInUp 0.8s ease 0.3s backwards;
             }
-            
+
             .content-section::after {
                 display: none;
             }
-            
+
             .section-divider {
                 display: none;
             }
-            
+
             /* Session Indicators Mobile Fix */
             .session-indicator {
                 position: fixed;
@@ -785,7 +844,7 @@
                 pointer-events: auto;
                 max-width: 200px;
             }
-            
+
             .session-content {
                 position: fixed;
                 top: 20px;
@@ -798,42 +857,42 @@
                 pointer-events: auto;
                 max-width: 200px;
             }
-            
+
             .session-label {
                 font-size: 11px;
             }
-            
+
             .content-title {
                 font-size: 32px;
                 text-align: center;
                 animation: slideInUp 0.8s ease 0.5s backwards;
             }
-            
+
             .content-subtitle {
                 text-align: center;
                 animation: slideInUp 0.8s ease 0.6s backwards;
             }
-            
+
             .content-wrapper {
                 padding: 10px;
                 max-width: 100%;
             }
-            
+
             .login-box {
                 max-width: 100%;
                 margin: 0 auto;
                 padding: 30px 25px;
                 animation: slideInDown 0.8s ease 0.2s backwards;
             }
-            
+
             .stats-grid {
                 animation: slideInUp 0.8s ease 0.7s backwards;
             }
-            
+
             .features-list {
                 animation: slideInUp 0.8s ease 0.8s backwards;
             }
-            
+
             /* Mobile specific adjustments */
             .content-badge {
                 display: flex;
@@ -843,7 +902,7 @@
                 margin: 0 auto 30px;
                 width: fit-content;
             }
-            
+
             /* Mobile scroll indicator */
             .scroll-indicator {
                 position: absolute;
@@ -860,21 +919,28 @@
                 align-items: center;
                 gap: 10px;
             }
-            
+
             .scroll-text {
                 font-size: 12px;
                 color: var(--text-muted);
                 letter-spacing: 1px;
                 text-transform: uppercase;
             }
-            
+
             @keyframes bounce {
-                0%, 20%, 50%, 80%, 100% {
+
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
                     transform: translateX(-50%) translateY(0);
                 }
+
                 40% {
                     transform: translateX(-50%) translateY(-10px);
                 }
+
                 60% {
                     transform: translateX(-50%) translateY(-5px);
                 }
@@ -882,42 +948,44 @@
         }
 
         @media screen and (max-width: 576px) {
-            .content-section, .login-section {
+
+            .content-section,
+            .login-section {
                 padding: 20px 15px;
                 min-height: auto;
             }
-            
+
             .content-title {
                 font-size: 28px;
             }
-            
+
             .stats-grid {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
-            
+
             .stat-card {
                 padding: 20px;
             }
-            
+
             .login-box {
                 padding: 25px 20px;
             }
-            
+
             .login-title {
                 font-size: 24px;
             }
-            
+
             .remember-forgot {
                 gap: 15px;
                 align-items: flex-start;
             }
-            
+
             .feature-item {
                 padding: 12px;
                 margin-bottom: 15px;
             }
-            
+
             /* Mobile session indicators */
             .session-indicator {
                 top: 15px;
@@ -925,18 +993,18 @@
                 padding: 8px 12px;
                 max-width: 150px;
             }
-            
+
             .session-content {
                 top: 15px;
                 right: 15px;
                 padding: 8px 12px;
                 max-width: 150px;
             }
-            
+
             .session-label {
                 font-size: 10px;
             }
-            
+
             .mobile-content-header {
                 text-align: center;
                 margin-bottom: 30px;
@@ -949,27 +1017,27 @@
             .content-title {
                 font-size: 24px;
             }
-            
+
             .content-subtitle {
                 font-size: 16px;
             }
-            
+
             .stat-number {
                 font-size: 24px;
             }
-            
+
             .login-box {
                 padding: 20px 15px;
             }
-            
+
             .form-input {
                 padding: 14px 16px;
             }
-            
+
             .login-btn {
                 padding: 16px;
             }
-            
+
             /* Hide session indicators on very small screens */
             .session-indicator,
             .session-content {
@@ -1082,18 +1150,19 @@
     <div class="split-container">
         <!-- Desktop Order: Content First -->
         <div class="content-section">
-        
+
             <div class="content-wrapper">
                 <div class="content-badge">
                     <i class="fas fa-shield-alt"></i> SECURE PLATFORM
                 </div>
-                
+
                 <h1 class="content-title">Access Your Digital Wealth Portfolio</h1>
-                
+
                 <p class="content-subtitle">
-                    Secure login to manage your investments, track performance, and maximize returns in our advanced trading ecosystem.
+                    Secure login to manage your investments, track performance, and maximize returns in our advanced trading
+                    ecosystem.
                 </p>
-                
+
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon">
@@ -1102,7 +1171,7 @@
                         <div class="stat-number">50K+</div>
                         <div class="stat-label">Active Traders</div>
                     </div>
-                    
+
                     <div class="stat-card">
                         <div class="stat-icon">
                             <i class="fas fa-chart-line"></i>
@@ -1111,7 +1180,7 @@
                         <div class="stat-label">Volume Traded</div>
                     </div>
                 </div>
-                
+
                 <ul class="features-list">
                     <li class="feature-item">
                         <div class="feature-icon">
@@ -1122,7 +1191,7 @@
                             <p class="feature-desc">256-bit encryption & 2FA protection for maximum security</p>
                         </div>
                     </li>
-                    
+
                     <li class="feature-item">
                         <div class="feature-icon">
                             <i class="fas fa-bolt"></i>
@@ -1132,8 +1201,8 @@
                             <p class="feature-desc">Live portfolio tracking with instant notifications</p>
                         </div>
                     </li>
-                    
-                   
+
+
                 </ul>
             </div>
         </div>
@@ -1145,8 +1214,8 @@
 
         <!-- Desktop Order: Login Second -->
         <div class="login-section">
-        
-            
+
+
             <div class="login-box">
                 <div class="login-header">
                     <h1 class="login-title">Welcome Back</h1>
@@ -1171,14 +1240,9 @@
                     <div class="form-group">
                         <label class="form-label">Username or Email</label>
                         <div class="input-group">
-                            <input type="text" 
-                                   class="form-input @error('username') is-invalid @enderror" 
-                                   id="username" 
-                                   name="username" 
-                                   value="{{ old('username') }}" 
-                                   placeholder="Enter username or email" 
-                                   required 
-                                   autofocus>
+                            <input type="text" class="form-input @error('username') is-invalid @enderror" id="username"
+                                name="username" value="{{ old('username') }}" placeholder="Enter username or email"
+                                minlength="3" maxlength="100" required autofocus>
                             <i class="fas fa-user input-icon"></i>
                         </div>
                         @error('username')
@@ -1191,12 +1255,8 @@
                     <div class="form-group">
                         <label class="form-label">Password</label>
                         <div class="input-group">
-                            <input type="password" 
-                                   class="form-input @error('password') is-invalid @enderror" 
-                                   id="password" 
-                                   name="password" 
-                                   placeholder="Enter your password" 
-                                   required>
+                            <input type="password" class="form-input @error('password') is-invalid @enderror" id="password"
+                                name="password" placeholder="Enter your password" minlength="6" maxlength="32" required>
                             <i class="fas fa-eye input-icon" id="togglePassword"></i>
                         </div>
                         @error('password')
@@ -1238,7 +1298,7 @@
             </div>
         </div>
 
-    
+
     </div>
 
     <!-- Loading Overlay -->
@@ -1247,7 +1307,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Set body opacity to 1 after load
             setTimeout(() => {
                 document.body.style.opacity = '1';
@@ -1255,7 +1315,7 @@
 
             // Check if mobile view
             const isMobile = window.innerWidth <= 992;
-            
+
             // Show/hide mobile only elements
             if (isMobile) {
                 document.querySelectorAll('.mobile-only').forEach(el => {
@@ -1266,14 +1326,15 @@
 
             // Password toggle
             const togglePassword = document.getElementById('togglePassword');
-            const password = document.getElementById('password');
-            
-            if (togglePassword && password) {
-                togglePassword.addEventListener('click', function() {
-                    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                    password.setAttribute('type', type);
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
+            if (togglePassword) {
+                togglePassword.addEventListener('click', function () {
+                    const passwordInput = this.parentElement.querySelector('input');
+                    if (passwordInput) {
+                        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                        passwordInput.setAttribute('type', type);
+                        this.classList.toggle('fa-eye');
+                        this.classList.toggle('fa-eye-slash');
+                    }
                 });
             }
 
@@ -1285,14 +1346,14 @@
 
             // Form submission handling (AJAX)
             if (loginForm && submitBtn) {
-                loginForm.addEventListener('submit', function(e) {
+                loginForm.addEventListener('submit', function (e) {
                     e.preventDefault();
-                    
+
                     // Show loading overlay
                     loadingOverlay.classList.add('active');
                     submitBtn.disabled = true;
                     btnText.innerHTML = '<span class="spinner"></span> Validating...';
-                    
+
                     const formData = new FormData(this);
                     const url = this.getAttribute('action');
                     const passwordInput = document.getElementById('password');
@@ -1305,65 +1366,65 @@
                             'Accept': 'application/json'
                         }
                     })
-                    .then(response => {
-                        // Laravel returns 302 for success redirect in some cases even with AJAX
-                        // or it returns 200 with a JSON redirect if we were to customize it.
-                        // Standard AuthenticatesUsers returns a redirect.
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                            return;
-                        }
-                        return response.json().then(data => ({ status: response.status, data }));
-                    })
-                    .then(res => {
-                        if (!res) return; // Already handled redirection
+                        .then(response => {
+                            // Laravel returns 302 for success redirect in some cases even with AJAX
+                            // or it returns 200 with a JSON redirect if we were to customize it.
+                            // Standard AuthenticatesUsers returns a redirect.
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                                return;
+                            }
+                            return response.json().then(data => ({ status: response.status, data }));
+                        })
+                        .then(res => {
+                            if (!res) return; // Already handled redirection
 
-                        if (res.status === 200 || (res.data && res.data.redirect)) {
-                            window.location.href = res.data.redirect || "{{ route('user.home') }}";
-                        } else {
-                            // Error handling
+                            if (res.status === 200 || (res.data && res.data.redirect)) {
+                                window.location.href = res.data.redirect || "{{ route('user.home') }}";
+                            } else {
+                                // Error handling
+                                loadingOverlay.classList.remove('active');
+                                submitBtn.disabled = false;
+                                btnText.innerHTML = 'Sign In';
+
+                                // Shake animation
+                                loginForm.classList.add('shake');
+                                setTimeout(() => loginForm.classList.remove('shake'), 500);
+
+                                // UI Feedback: Red Border and Clear Password
+                                passwordInput.value = '';
+                                passwordInput.classList.add('is-invalid-red');
+
+                                // Show Notification
+                                let errorMessage = 'Invalid credentials provided.';
+                                if (res.data && res.data.errors) {
+                                    errorMessage = Object.values(res.data.errors)[0][0];
+                                } else if (res.data && res.data.message) {
+                                    errorMessage = res.data.message;
+                                }
+
+                                if (typeof notify === 'function') {
+                                    notify('error', errorMessage);
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Login Error:', error);
                             loadingOverlay.classList.remove('active');
                             submitBtn.disabled = false;
                             btnText.innerHTML = 'Sign In';
-                            
-                            // Shake animation
-                            loginForm.classList.add('shake');
-                            setTimeout(() => loginForm.classList.remove('shake'), 500);
 
-                            // UI Feedback: Red Border and Clear Password
-                            passwordInput.value = '';
-                            passwordInput.classList.add('is-invalid-red');
-                            
-                            // Show Notification
-                            let errorMessage = 'Invalid credentials provided.';
-                            if (res.data && res.data.errors) {
-                                errorMessage = Object.values(res.data.errors)[0][0];
-                            } else if (res.data && res.data.message) {
-                                errorMessage = res.data.message;
-                            }
-                            
                             if (typeof notify === 'function') {
-                                notify('error', errorMessage);
+                                notify('error', 'Something went wrong. Please try again.');
                             }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Login Error:', error);
-                        loadingOverlay.classList.remove('active');
-                        submitBtn.disabled = false;
-                        btnText.innerHTML = 'Sign In';
-                        
-                        if (typeof notify === 'function') {
-                            notify('error', 'Something went wrong. Please try again.');
-                        }
-                    });
+                        });
                 });
             }
 
             // Remove red border when user starts typing in password field
             const passwordInput = document.getElementById('password');
             if (passwordInput) {
-                passwordInput.addEventListener('input', function() {
+                passwordInput.addEventListener('input', function () {
                     if (this.classList.contains('is-invalid-red')) {
                         this.classList.remove('is-invalid-red');
                     }
@@ -1373,7 +1434,7 @@
             // Ripple effect for buttons
             const buttons = document.querySelectorAll('.login-btn');
             buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
+                button.addEventListener('click', function (e) {
                     createRippleEffect(this, e);
                 });
             });
@@ -1381,16 +1442,16 @@
             // Input focus effects
             const inputs = document.querySelectorAll('.form-input');
             inputs.forEach(input => {
-                input.addEventListener('focus', function() {
+                input.addEventListener('focus', function () {
                     this.parentElement.style.transform = 'translateY(-2px)';
                 });
-                
-                input.addEventListener('blur', function() {
+
+                input.addEventListener('blur', function () {
                     this.parentElement.style.transform = 'translateY(0)';
                 });
 
                 // Remove error state on input
-                input.addEventListener('input', function() {
+                input.addEventListener('input', function () {
                     if (this.classList.contains('is-invalid')) {
                         this.classList.remove('is-invalid');
                         const errorElement = this.parentElement.parentElement.querySelector('.invalid-feedback');
@@ -1418,8 +1479,8 @@
             const featureItems = document.querySelectorAll('.feature-item');
             featureItems.forEach((item, index) => {
                 item.style.animationDelay = `${0.3 + (index * 0.1)}s`;
-                
-                item.addEventListener('mouseenter', function() {
+
+                item.addEventListener('mouseenter', function () {
                     const icon = this.querySelector('.feature-icon');
                     if (icon) {
                         icon.style.animation = 'float 0.5s ease';
@@ -1471,7 +1532,7 @@
                     }, 500);
                 }, 300);
             }
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter' && loginForm && loginForm.checkValidity()) {
                     submitBtn.click();
                 }
@@ -1479,9 +1540,9 @@
 
             const scrollIndicator = document.querySelector('.scroll-indicator');
             if (scrollIndicator && isMobile) {
-                scrollIndicator.addEventListener('click', function() {
+                scrollIndicator.addEventListener('click', function () {
                     const contentSection = document.querySelector('.content-section');
-                    contentSection.scrollIntoView({ 
+                    contentSection.scrollIntoView({
                         behavior: 'smooth',
                         block: 'start'
                     });
@@ -1490,10 +1551,10 @@
 
             if (isMobile) {
                 let lastScrollTop = 0;
-                window.addEventListener('scroll', function() {
+                window.addEventListener('scroll', function () {
                     const scrollIndicator = document.querySelector('.scroll-indicator');
                     if (!scrollIndicator) return;
-                    
+
                     const st = window.pageYOffset || document.documentElement.scrollTop;
                     if (st > lastScrollTop) {
                         scrollIndicator.style.opacity = '0';
@@ -1504,11 +1565,11 @@
                 });
             }
             let resizeTimer;
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
+                resizeTimer = setTimeout(function () {
                     const isNowMobile = window.innerWidth <= 992;
-                    
+
                     if (isNowMobile) {
                         document.querySelectorAll('.mobile-only').forEach(el => {
                             el.style.display = 'block';
@@ -1526,10 +1587,10 @@
             function createRippleEffect(button, event = null) {
                 const ripple = document.createElement('span');
                 ripple.classList.add('ripple');
-                
+
                 const rect = button.getBoundingClientRect();
                 let x, y;
-                
+
                 if (event) {
                     x = event.clientX - rect.left;
                     y = event.clientY - rect.top;
@@ -1537,14 +1598,14 @@
                     x = rect.width / 2;
                     y = rect.height / 2;
                 }
-                
+
                 ripple.style.left = x + 'px';
                 ripple.style.top = y + 'px';
-                
+
                 button.style.position = 'relative';
                 button.style.overflow = 'hidden';
                 button.appendChild(ripple);
-                
+
                 setTimeout(() => {
                     ripple.remove();
                 }, 600);
@@ -1552,7 +1613,7 @@
             if (isMobile) {
                 const contentSection = document.querySelector('.content-section');
                 const loginSection = document.querySelector('.login-section');
-                
+
                 if (contentSection && loginSection) {
                     const observer = new IntersectionObserver((entries) => {
                         entries.forEach(entry => {
@@ -1561,7 +1622,7 @@
                             }
                         });
                     }, { threshold: 0.1 });
-                    
+
                     observer.observe(contentSection);
                     observer.observe(loginSection);
                 }
@@ -1569,7 +1630,7 @@
             if (isMobile) {
                 const phoneNumbers = document.querySelectorAll('.phone-number');
                 phoneNumbers.forEach(number => {
-                    number.addEventListener('click', function() {
+                    number.addEventListener('click', function () {
                         const phoneNum = this.textContent.trim();
                         if (confirm(`Call ${phoneNum}?`)) {
                             window.location.href = `tel:${phoneNum}`;

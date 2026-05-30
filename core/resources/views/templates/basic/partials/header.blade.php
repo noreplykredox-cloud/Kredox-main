@@ -309,8 +309,8 @@
     <div class="trx-close-btn" id="trxCloseBtn">&times;</div>
     <ul class="trx-mobile-nav">
         <li><a href="{{ route('home') }}" class="trx-mobile-nav-link">Home</a></li>
-        <li><a href="#about-section" class="trx-mobile-nav-link">Institution</a></li>
-        <li><a href="#how-it-works" class="trx-mobile-nav-link">Protocol</a></li>
+        <li><a href="{{ request()->routeIs('home') ? '#about-section' : route('home') . '#about-section' }}" class="trx-mobile-nav-link">Institution</a></li>
+        <li><a href="{{ request()->routeIs('home') ? '#how-it-works' : route('home') . '#how-it-works' }}" class="trx-mobile-nav-link">Protocol</a></li>
         <li><a href="{{ route('contact') }}" class="trx-mobile-nav-link">Support</a></li>
 
         <li
@@ -344,8 +344,8 @@
 
             <ul class="trx-nav">
                 <li><a href="{{ route('home') }}" class="trx-nav-link">Home</a></li>
-                <li><a href="#about-section" class="trx-nav-link">Institution</a></li>
-                <li><a href="#how-it-works" class="trx-nav-link">Protocol</a></li>
+                <li><a href="{{ request()->routeIs('home') ? '#about-section' : route('home') . '#about-section' }}" class="trx-nav-link">Institution</a></li>
+                <li><a href="{{ request()->routeIs('home') ? '#how-it-works' : route('home') . '#how-it-works' }}" class="trx-nav-link">Protocol</a></li>
                 <li><a href="{{ route('contact') }}" class="trx-nav-link">Support</a></li>
             </ul>
 
