@@ -56,18 +56,21 @@
                                    value="{{ old('amount') }}" 
                                    placeholder="0.00"
                                    required
-                                   min="0"
+                                   min="100"
                                    inputmode="decimal"
                                    onkeypress="return (event.charCode != 45 && event.charCode != 43)"
                                    oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');">
                             <div class="amount-presets">
-                                <button type="button" class="preset-btn" data-amount="10">$10</button>
-                                <button type="button" class="preset-btn" data-amount="50">$50</button>
                                 <button type="button" class="preset-btn" data-amount="100">$100</button>
+                                <button type="button" class="preset-btn" data-amount="200">$200</button>
                                 <button type="button" class="preset-btn" data-amount="500">$500</button>
+                                <button type="button" class="preset-btn" data-amount="1000">$1000</button>
                             </div>
                         </div>
-                        <div class="input-hint">Enter amount between $10 - $5000</div>
+                        <div class="amount-error-msg mt-2 text-danger d-none" style="font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-exclamation-circle"></i> Minimum deposit is 100 {{ $general->cur_text }}
+                        </div>
+                        <div class="input-hint">Enter amount between $100 - $5000</div>
                     </div>
 
                     <!-- Payment Method Select -->
@@ -224,7 +227,7 @@
                             <i class="fas fa-chevron-down"></i>
                         </div>
                         <div class="faq-answer">
-                            <p>Minimum deposit is $10 and maximum varies by payment method. You can check the limits for each method above.</p>
+                            <p>Minimum deposit is $100 and maximum varies by payment method. You can check the limits for each method above.</p>
                         </div>
                     </div>
                     
@@ -299,12 +302,12 @@
                             
                             <!-- Payment Method Info -->
                             <div class="method-card selected mb-4" style="cursor:default; margin-bottom: 20px;">
-                                <div class="method-icon">
+                                <div class="method-icon" id="step2-gateway-icon">
                                     <i class="fas fa-university"></i>
                                 </div>
                                 <div class="method-info">
                                     <h4 id="step2-gateway-name"></h4>
-                                    <p class="method-fee">Manual Bank Transfer / Crypto Payment</p>
+                                    <p class="method-fee" id="step2-gateway-subtext">Manual Bank Transfer / Crypto Payment</p>
                                 </div>
                             </div>
 
@@ -1739,7 +1742,6 @@
         if (selectedMethod.length > 0) {
             const info = selectedMethod.data('info');
             const max_amount = parseFloat(info.max_amount);
-            const min_amount = parseFloat(info.min_amount);
             let val = parseFloat($(this).val());
             
             if (val > max_amount) {
@@ -1752,14 +1754,22 @@
             const amount = parseFloat($(this).val()) || 0;
             const selectedMethod = $('.method-card.selected');
             
+            if ($(this).val() !== '' && amount < 100) {
+                $('.amount-error-msg').removeClass('d-none');
+                $('#submitBtn').prop('disabled', true);
+            } else {
+                $('.amount-error-msg').addClass('d-none');
+            }
+
             if (selectedMethod.length > 0) {
                 const info = selectedMethod.data('info');
                 updatePaymentPreview(info);
-                const min_fmt = parseFloat(info.min_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                const min_val = Math.max(100, parseFloat(info.min_amount));
+                const min_fmt = min_val.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 const max_fmt = parseFloat(info.max_amount).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
                 $('.input-hint').html(`<i class="fas fa-info-circle"></i> Range: ${min_fmt} - ${max_fmt} ${info.currency}`);
             }
-            if (amount > 0 && selectedMethod.length > 0) {
+            if (amount >= 100 && selectedMethod.length > 0) {
                 const info = selectedMethod.data('info');
                 if (amount >= parseFloat(info.min_amount) && amount <= parseFloat(info.max_amount)) {
                     $('#submitBtn').prop('disabled', false);
@@ -1815,13 +1825,22 @@
         $('.payment-preview').removeClass('d-none');
         
         // Check amount limits
-        const minAmount = parseFloat(info.min_amount);
+        const minAmount = Math.max(100, parseFloat(info.min_amount));
         const maxAmount = parseFloat(info.max_amount);
         
-        if (amount < minAmount || amount > maxAmount) {
+        if (amount < 100) {
+            $('.amount-error-msg').removeClass('d-none');
             $('#submitBtn').prop('disabled', true);
-            showAlert('Amount must be between ' + minAmount + ' and ' + maxAmount + ' ' + info.currency, 'error');
+        } else if (amount < minAmount) {
+            $('.amount-error-msg').addClass('d-none');
+            $('#submitBtn').prop('disabled', true);
+            showAlert('Amount must be at least ' + minAmount + ' ' + info.currency, 'error');
+        } else if (amount > maxAmount) {
+            $('.amount-error-msg').addClass('d-none');
+            $('#submitBtn').prop('disabled', true);
+            showAlert('Amount must be less than ' + maxAmount + ' ' + info.currency, 'error');
         } else {
+            $('.amount-error-msg').addClass('d-none');
             $('#submitBtn').prop('disabled', false);
         }
     }
@@ -1856,8 +1875,15 @@
         
         // Validate amount limits
         const info = selectedMethod.data('info');
-        const minAmount = parseFloat(info.min_amount);
+        const minAmount = Math.max(100, parseFloat(info.min_amount));
         const maxAmount = parseFloat(info.max_amount);
+        
+        if (amount < 100) {
+            e.preventDefault();
+            $('.amount-error-msg').removeClass('d-none');
+            showAlert('Minimum deposit amount is 100 ' + info.currency, 'error');
+            return false;
+        }
         
         if (amount < minAmount || amount > maxAmount) {
             e.preventDefault();
@@ -1888,9 +1914,17 @@
                     $('#step2-gateway-name').text(response.method_name);
                     $('#step2-instructions').html(response.gateway_description);
 
+                    if (response.method_name.toLowerCase().includes('bep')) {
+                        $('#step2-gateway-subtext').text('USDT BEP20 Network Transfer');
+                    } else {
+                        $('#step2-gateway-subtext').text('Manual Bank Transfer / Crypto Payment');
+                    }
+
                     if (response.gateway_crypto == 1) {
+                        $('#step2-gateway-icon').html('<i class="fas fa-coins" style="color: var(--warning-orange);"></i>');
                         $('#crypto-info-container').removeClass('d-none');
                     } else {
+                        $('#step2-gateway-icon').html('<i class="fas fa-university"></i>');
                         $('#crypto-info-container').addClass('d-none');
                     }
 

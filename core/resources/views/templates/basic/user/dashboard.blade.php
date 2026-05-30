@@ -1,6 +1,231 @@
 @extends($activeTemplate . 'layouts.master')
 @push('style')
     <link rel="stylesheet" href="{{ asset('/core/resources/views/templates/basic/user/dashboard.css') }}">
+    <style>
+        /* Custom Investment & Withdrawal History Popup styles */
+        .history-list-container {
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+        
+        .history-list-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .history-list-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .history-list-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 0, 0, 0.25);
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+        
+        .history-list-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 0, 0, 0.5);
+        }
+        
+        .history-card-item {
+            background: rgba(17, 17, 17, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .history-card-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: transparent;
+            transition: var(--transition);
+        }
+        
+        .history-card-item.type-investment::before {
+            background: var(--success-green);
+            box-shadow: 0 0 10px var(--success-green);
+        }
+        
+        .history-card-item.type-withdrawal::before {
+            background: var(--danger-red);
+            box-shadow: 0 0 10px var(--danger-red);
+        }
+        
+        .history-card-item:hover {
+            transform: translateY(-2px) translateX(2px);
+            border-color: rgba(255, 0, 0, 0.2);
+            background: rgba(25, 25, 25, 0.85);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+        }
+        
+        .history-card-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .history-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+        
+        .history-card-item.type-investment .history-card-icon {
+            background: rgba(0, 255, 0, 0.08);
+            color: var(--success-green);
+            border: 1px solid rgba(0, 255, 0, 0.15);
+        }
+        
+        .history-card-item.type-withdrawal .history-card-icon {
+            background: rgba(255, 0, 0, 0.08);
+            color: var(--danger-red);
+            border: 1px solid rgba(255, 0, 0, 0.15);
+        }
+        
+        .history-card-item:hover .history-card-icon {
+            transform: scale(1.05);
+        }
+        
+        .history-card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .history-card-title {
+            font-size: 14.5px;
+            font-weight: 600;
+            color: var(--text-white);
+            margin: 0;
+            letter-spacing: 0.2px;
+        }
+        
+        .history-card-meta {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        
+        .history-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .history-card-meta i {
+            color: rgba(255, 0, 0, 0.5);
+        }
+        
+        .history-card-trx {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 1.5px 6px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 11px;
+            letter-spacing: 0.5px;
+        }
+        
+        .history-card-right {
+            text-align: right;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        .history-card-amount {
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        
+        .history-card-item.type-investment .history-card-amount {
+            color: var(--success-green);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.15);
+        }
+        
+        .history-card-item.type-withdrawal .history-card-amount {
+            color: var(--danger-red);
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.15);
+        }
+        
+        .history-card-currency {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-left: 2px;
+            text-transform: uppercase;
+        }
+        
+        .history-card-status-badge {
+            font-size: 9.5px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 2.5px 9px;
+            border-radius: 30px;
+            display: inline-block;
+            width: fit-content;
+            margin-left: auto;
+        }
+        
+        .history-card-item.type-investment .history-card-status-badge {
+            background: rgba(0, 255, 0, 0.06);
+            color: var(--success-green);
+            border: 1px solid rgba(0, 255, 0, 0.12);
+        }
+        
+        .history-card-item.type-withdrawal .history-card-status-badge {
+            background: rgba(255, 0, 0, 0.06);
+            color: var(--danger-red);
+            border: 1px solid rgba(255, 0, 0, 0.12);
+        }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 576px) {
+            .history-card-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 12px 14px;
+            }
+            .history-card-right {
+                text-align: left;
+                width: 100%;
+                border-top: 1px solid rgba(255, 255, 255, 0.06);
+                padding-top: 10px;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .history-card-status-badge {
+                margin-left: 0;
+            }
+        }
+    </style>
 @endpush
 @section('content')
     @php
@@ -337,6 +562,9 @@
                             <a href="{{ route('plan') }}" class="action-btn invest-now-btn-header" title="Invest Now">
                                 <i class="fas fa-rocket"></i> <span class="d-none d-sm-inline ms-1">Invest</span>
                             </a>
+                            <button type="button" class="action-btn history-btn" id="btnInvestHistory" title="Investment History">
+                                <i class="fas fa-history"></i>
+                            </button>
                             <button type="button" class="action-btn refresh-overview-btn" id="refreshOverview"
                                 title="Refresh Data">
                                 <i class="fas fa-sync-alt"></i>
@@ -826,12 +1054,131 @@
             </div>
         </div>
     </div>
+
+    <!-- Investment & Withdrawal History Modal -->
+    <div id="investHistoryModal" class="modal fade custom--modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-history text-danger mr-2"></i> Investment & Withdrawal History</h5>
+                    <button type="button" class="close-btn" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="investHistoryList" class="history-list-container d-none">
+                        <!-- Ajax content -->
+                    </div>
+                    <div id="investHistoryEmpty" class="text-center py-5 d-none">
+                        <div class="empty-icon-wrapper mb-3" style="width: 60px; height: 60px; background: rgba(255, 0, 0, 0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 1px solid rgba(255,0,0,0.1);">
+                            <i class="fas fa-receipt fa-2x text-muted"></i>
+                        </div>
+                        <h5 class="text-white font-weight-bold mb-1" style="font-size: 15px;">No History Found</h5>
+                        <p class="text-muted mb-0 small">No investment or withdrawal transactions found.</p>
+                    </div>
+                    <div id="investHistoryLoading" class="text-center py-5">
+                        <i class="fas fa-circle-notch fa-spin fa-2x text-danger mb-3"></i>
+                        <p class="text-muted mb-0 small">Loading history...</p>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: flex !important; justify-content: flex-end !important;">
+                    <button type="button" class="btn-close-modal" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('script')
     <script>
         (function ($) {
             "use strict";
+
+            // Load Investment & Withdrawal History
+            $('#btnInvestHistory').click(function () {
+                $('#investHistoryModal').modal('show');
+                $('#investHistoryList').empty().addClass('d-none');
+                $('#investHistoryEmpty').addClass('d-none');
+                $('#investHistoryLoading').removeClass('d-none');
+
+                $.ajax({
+                    url: "{{ route('user.home') }}",
+                    method: "GET",
+                    data: { get_investment_history: 1 },
+                    dataType: "json",
+                    success: function (response) {
+                        $('#investHistoryLoading').addClass('d-none');
+                        if (response.status === 'success' && response.data.length > 0) {
+                            $('#investHistoryList').removeClass('d-none');
+                            let html = '';
+                            response.data.forEach(function (trx) {
+                                let date = new Date(trx.created_at);
+                                let formattedDate = date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) + ' ' + date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                                
+                                let cardClass = '';
+                                let iconHtml = '';
+                                let title = '';
+                                let sign = '';
+                                let badgeText = '';
+                                
+                                if (trx.remark === 'plan_purchase') {
+                                    cardClass = 'type-investment';
+                                    iconHtml = '<i class="fas fa-rocket"></i>';
+                                    title = 'Investment Purchase';
+                                    sign = '+';
+                                    badgeText = 'Completed';
+                                } else if (trx.remark === 'investment_withdrawal') {
+                                    cardClass = 'type-withdrawal';
+                                    iconHtml = '<i class="fas fa-minus-circle"></i>';
+                                    title = 'Investment Withdrawal';
+                                    sign = '-';
+                                    badgeText = 'Withdrawn';
+                                } else if (trx.remark === 'withdraw') {
+                                    cardClass = 'type-withdrawal';
+                                    iconHtml = '<i class="fas fa-wallet"></i>';
+                                    title = 'Withdrawal';
+                                    sign = '-';
+                                    badgeText = 'Completed';
+                                }
+
+                                html += `
+                                    <div class="history-card-item ${cardClass}">
+                                        <div class="history-card-left">
+                                            <div class="history-card-icon">
+                                                ${iconHtml}
+                                            </div>
+                                            <div class="history-card-details">
+                                                <h4 class="history-card-title">${title}</h4>
+                                                <div class="history-card-meta">
+                                                    <span><i class="far fa-clock"></i> ${formattedDate}</span>
+                                                    <span><i class="fas fa-hashtag"></i> <code class="history-card-trx">${trx.trx}</code></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="history-card-right">
+                                            <div class="history-card-amount">
+                                                ${sign}${(parseFloat(trx.amount)).toFixed(2)}
+                                                <span class="history-card-currency">{{ __($general->cur_text) }}</span>
+                                            </div>
+                                            <span class="history-card-status-badge">${badgeText}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            $('#investHistoryList').html(html);
+                        } else {
+                            $('#investHistoryEmpty').removeClass('d-none');
+                        }
+                    },
+                    error: function () {
+                        $('#investHistoryLoading').addClass('d-none');
+                        $('#investHistoryEmpty').removeClass('d-none').find('p').text('Failed to load history. Please try again.');
+                    }
+                });
+            });
+
             $('#copyBoard').click(function () {
                 var copyText = document.getElementsByClassName("referral-input")[0];
                 copyText.select();

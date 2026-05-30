@@ -19,6 +19,19 @@ class UserController extends Controller
     public function home()
     {
         $user = auth()->user();
+        if (request()->ajax() && request()->has('get_investment_history')) {
+            $history = \DB::table('transactions')
+                ->where('user_id', $user->id)
+                ->whereIn('remark', ['plan_purchase', 'investment_withdrawal', 'withdraw'])
+                ->orderBy('id', 'desc')
+                ->get();
+            
+            return response()->json([
+                'status' => 'success',
+                'data' => $history
+            ]);
+        }
+
         if (request()->ajax() && request()->has('get_overview')) {
             $general = gs();
             $totalInvest = $user->invest_amount;

@@ -1031,17 +1031,14 @@
                             <th class="left-aligned-header">Member Details</th>
                             <th class="left-aligned-header">Direct Upline</th>
                             <th>Team Size</th>
-                            <th>Inv. Volume</th>
+                            <th>Investment</th>
                         </tr>
                     </thead>
                     <tbody>
                         @if(count($allReferrals) > 0)
                             @foreach($allReferrals as $index => $ref)
                                 @php
-                                    $transactions = DB::table('transactions')
-                                        ->where('remark', 'plan_purchase')
-                                        ->where('user_id', $ref['user']->id)
-                                        ->sum('amount');
+                                    $investAmount = $ref['user']->invest_amount;
                                     $teamSize = $ref['user']->allReferrals->count();
                                 @endphp
                                 <tr class="table-row-item">
@@ -1098,7 +1095,7 @@
                                     <td>
                                         <div style="display: flex; flex-direction: column; align-items: center;">
                                             <span
-                                                style="color:var(--success-green); font-weight:800; font-size: 16px;">${{ number_format($transactions, 2) }}</span>
+                                                style="color:var(--success-green); font-weight:800; font-size: 16px;">${{ number_format($investAmount, 2) }}</span>
                                             <span
                                                 style="font-size: 10px; text-transform: uppercase; color: var(--text-muted);">USDT</span>
                                         </div>
@@ -1125,10 +1122,7 @@
                 @if(count($allReferrals) > 0)
                     @foreach($allReferrals as $index => $ref)
                         @php
-                            $transactions = DB::table('transactions')
-                                ->where('remark', 'plan_purchase')
-                                ->where('user_id', $ref['user']->id)
-                                ->sum('amount');
+                            $investAmount = $ref['user']->invest_amount;
                             $teamSize = $ref['user']->allReferrals->count();
                         @endphp
                         <div class="deposit-card-mobile mobile-card-item">
@@ -1181,10 +1175,10 @@
                                 </div>
                                 <div class="card-mobile-row">
                                     <div class="card-row-label">
-                                        <i class="fas fa-chart-bar"></i> <span>Inv. Volume</span>
+                                        <i class="fas fa-chart-bar"></i> <span>Investment</span>
                                     </div>
                                     <div class="card-row-value" style="color: var(--success-green);">
-                                        ${{ number_format($transactions, 2) }}</div>
+                                        ${{ number_format($investAmount, 2) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -1224,7 +1218,7 @@
                             'image' => $img,
                             'level' => $lvl,
                             'teamSize' => count($u->allReferrals),
-                            'volume' => DB::table('transactions')->where('remark', 'plan_purchase')->where('user_id', $u->id)->sum('amount')
+                            'volume' => $u->invest_amount
                         ];
 
                         if ($u->allReferrals) {
@@ -1270,7 +1264,7 @@
                     <div class="modal-stat-box">
                         <div class="stat-icon" style="color:var(--success-green); background:rgba(46,213,115,0.1);"><i
                                 class="fas fa-coins"></i></div>
-                        <div class="stat-title">Total Inv.</div>
+                        <div class="stat-title">Investment</div>
                         <div class="stat-value" id="modalUserVol" style="color:var(--success-green);"></div>
                     </div>
                 </div>

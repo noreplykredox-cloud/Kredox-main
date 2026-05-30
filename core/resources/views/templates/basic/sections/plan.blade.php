@@ -25,10 +25,12 @@
                             <h3 class="title">{{ __($general->cur_sym) }}{{ getAmount($plan->price) }}</h3>
                         </div>
                         <ul class="plan-info">
+                            @if ($plan->referral_bonus > 0)
                             <li>
                                 <h6 class="direct">@lang('Direct Income Bonus') :
                                     {{ $general->cur_sym }}{{ getAmount($plan->referral_bonus) }}</h6>
                             </li>
+                            @endif
 
                             @php
                                 $sumCommission = 0;

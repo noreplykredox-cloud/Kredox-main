@@ -862,7 +862,7 @@
                                 <div class="amount-input-group">
                                     <span class="currency-symbol">{{ $general->cur_sym }}</span>
                                     <input type="number" step="any" name="amount" id="amountInput"
-                                        class="form-control amount-input" placeholder="0.00" min="10" max="1000000" required
+                                        class="form-control amount-input" placeholder="0.00" min="100" max="1000000" required
                                         onkeypress="return (event.charCode != 45 && event.charCode != 43)">
                                     <span id="balanceError"
                                         class="text-danger small mt-2 d-none animate__animated animate__headShake"
@@ -870,15 +870,20 @@
                                         <i class="fas fa-exclamation-triangle"></i> Insufficient Balance! Max:
                                         {{ $general->cur_sym }}{{ showAmount(auth()->user()->balance) }}
                                     </span>
+                                    <span id="minInvestmentError"
+                                        class="text-danger small mt-2 d-none animate__animated animate__headShake"
+                                        style="font-size: 12px; display: block;">
+                                        <i class="fas fa-exclamation-triangle"></i> Minimum investment amount is 100 {{ __($general->cur_text) }}.
+                                    </span>
                                     <div class="amount-presets">
-                                        <button type="button" class="preset-btn" data-amount="10">$10</button>
-                                        <button type="button" class="preset-btn" data-amount="20">$20</button>
-                                        <button type="button" class="preset-btn" data-amount="50">$50</button>
                                         <button type="button" class="preset-btn" data-amount="100">$100</button>
                                         <button type="button" class="preset-btn" data-amount="200">$200</button>
                                         <button type="button" class="preset-btn" data-amount="500">$500</button>
                                         <button type="button" class="preset-btn" data-amount="1000">$1000</button>
+                                        <button type="button" class="preset-btn" data-amount="1500">$1500</button>
                                         <button type="button" class="preset-btn" data-amount="2000">$2000</button>
+                                        <button type="button" class="preset-btn" data-amount="5000">$5000</button>
+                                        <button type="button" class="preset-btn" data-amount="10000">$10000</button>
                                     </div>
                                 </div>
                             </div>
@@ -888,6 +893,7 @@
                                     <h4><i class="fas fa-chart-pie"></i> ROI & Commission Details</h4>
                                 </div>
                                 <div class="preview-details">
+                                    @if ($plan->referral_percentage > 0)
                                     <div class="detail-row">
                                         <div class="detail-info">
                                             <span>Direct Income Bonus</span>
@@ -896,6 +902,7 @@
                                         </div>
                                         <span class="detail-amount">{{ getAmount($plan->referral_percentage) }}%</span>
                                     </div>
+                                    @endif
                                     <div class="detail-row">
                                         <div class="detail-info">
                                             <span>Network Commission</span>
@@ -1206,15 +1213,22 @@
                 } else {
                     $('#balanceError').addClass('d-none');
                 }
-                $('#displayAmount').text(amt.toFixed(2));
 
-                // Hard limits: min 10, max 1,000,000, and must be <= current balance
+                // Hard limits: min 100, max 1,000,000, and must be <= current balance
                 // Also respects plan specific limits if they are stricter
-                let hardMin = 10;
+                let hardMin = 100;
                 let hardMax = 1000000;
 
                 let effectiveMin = Math.max(minInvest, hardMin);
                 let effectiveMax = maxInvest === Infinity ? hardMax : Math.min(maxInvest, hardMax);
+
+                // Show/Hide Min Investment Error Message
+                if (amt > 0 && amt < effectiveMin) {
+                    $('#minInvestmentError').removeClass('d-none');
+                } else {
+                    $('#minInvestmentError').addClass('d-none');
+                }
+                $('#displayAmount').text(amt.toFixed(2));
 
                 if (amt >= effectiveMin && amt <= effectiveMax && amt <= currentBalance) {
                     $('#nextBtn').prop('disabled', false);
