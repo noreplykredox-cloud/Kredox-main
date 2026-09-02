@@ -16,6 +16,8 @@ class FileInfo
     |
     */
 
+    
+
     public function fileInfo(){
         $data['withdrawVerify'] = [
             'path'=>'assets/images/verify/withdraw'
