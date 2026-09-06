@@ -677,35 +677,46 @@
 
         /* Logout Section */
         .logout-section {
-            padding: 10px 0;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            padding: 14px 18px;
+            padding-bottom: max(32px, calc(env(safe-area-inset-bottom, 0px) + 24px));
             background: var(--gradient-black);
             border-top: 1px solid var(--border-red);
             position: sticky;
             bottom: 0;
             z-index: 11;
+            flex-shrink: 0;
         }
 
         .logout-link {
             display: flex;
             align-items: center;
-            padding: 14px 20px;
-            color: var(--text-light);
+            justify-content: center;
+            padding: 13px 20px;
+            color: #ffffff !important;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             text-decoration: none;
             transition: var(--transition);
-            font-weight: 500;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+            width: 100%;
             white-space: nowrap;
         }
 
         .logout-link:hover {
-            background: rgba(255, 0, 0, 0.1);
-            color: var(--light-red);
+            background: linear-gradient(135deg, #ff0f1c 0%, #c40812 100%);
+            color: #ffffff !important;
+            box-shadow: 0 6px 22px rgba(229, 9, 20, 0.6);
+            transform: translateY(-1px);
         }
 
         .logout-link i {
-            width: 24px;
-            font-size: 18px;
-            margin-right: 15px;
+            width: 20px;
+            font-size: 16px;
+            margin-right: 10px;
             flex-shrink: 0;
         }
 
@@ -802,6 +813,29 @@
             color: #ffffff;
             border-color: transparent;
             box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
+        }
+
+        .mobile-logout-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #e50914 0%, #b20710 100%);
+            color: #ffffff !important;
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            box-shadow: 0 3px 12px rgba(229, 9, 20, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .mobile-logout-pill:hover {
+            background: linear-gradient(135deg, #ff0f1c 0%, #c40812 100%);
+            transform: scale(1.04);
+            box-shadow: 0 5px 18px rgba(229, 9, 20, 0.6);
         }
 
         /* Overlay for mobile */
@@ -1202,8 +1236,9 @@
                 <i class="fas fa-comments"></i>
             </a>
             @auth
-                <a href="{{ route('user.logout') }}" class="mobile-notification mobile-logout" title="Logout">
+                <a href="{{ route('user.logout') }}" class="mobile-logout-pill" title="Logout">
                     <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
                 </a>
             @endauth
         </div>
