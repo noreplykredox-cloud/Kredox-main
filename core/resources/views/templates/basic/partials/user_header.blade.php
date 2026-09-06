@@ -678,7 +678,7 @@
         /* Logout Section */
         .logout-section {
             padding: 10px 0;
-            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            padding-bottom: max(20px, calc(env(safe-area-inset-bottom, 0px) + 15px));
             background: var(--gradient-black);
             border-top: 1px solid var(--border-red);
             position: sticky;
