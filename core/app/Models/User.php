@@ -65,7 +65,7 @@ class User extends Authenticatable
 
     public function referrals()
     {
-        return $this->hasMany(User::class,'ref_by');
+        return $this->hasMany(User::class,'ref_by')->where('is_deleted', 0);
     }
 
     public function allReferrals(){
@@ -102,47 +102,52 @@ class User extends Authenticatable
     // SCOPES
     public function scopeActive()
     {
-        return $this->where('status', Status::USER_ACTIVE)->where('ev',Status::VERIFIED)->where('sv',Status::VERIFIED);
+        return $this->where('is_deleted', 0)->where('status', Status::USER_ACTIVE)->where('ev',Status::VERIFIED)->where('sv',Status::VERIFIED);
     }
 
     public function scopeBanned()
     {
-        return $this->where('status', Status::USER_BAN);
+        return $this->where('is_deleted', 0)->where('status', Status::USER_BAN);
     }
 
     public function scopeEmailUnverified()
     {
-        return $this->where('ev', Status::NO);
+        return $this->where('is_deleted', 0)->where('ev', Status::NO);
     }
 
     public function scopeMobileUnverified()
     {
-        return $this->where('sv', Status::NO);
+        return $this->where('is_deleted', 0)->where('sv', Status::NO);
     }
 
     public function scopeKycUnverified()
     {
-        return $this->where('kv', Status::KYC_UNVERIFIED);
+        return $this->where('is_deleted', 0)->where('kv', Status::KYC_UNVERIFIED);
     }
 
     public function scopeKycPending()
     {
-        return $this->where('kv', Status::KYC_PENDING);
+        return $this->where('is_deleted', 0)->where('kv', Status::KYC_PENDING);
     }
 
     public function scopeEmailVerified()
     {
-        return $this->where('ev', Status::VERIFIED);
+        return $this->where('is_deleted', 0)->where('ev', Status::VERIFIED);
     }
 
     public function scopeMobileVerified()
     {
-        return $this->where('sv', Status::VERIFIED);
+        return $this->where('is_deleted', 0)->where('sv', Status::VERIFIED);
     }
 
     public function scopeWithBalance()
     {
-        return $this->where('balance','>', 0);
+        return $this->where('is_deleted', 0)->where('balance','>', 0);
+    }
+
+    public function scopeDeleted()
+    {
+        return $this->where('is_deleted', 1);
     }
 
 }

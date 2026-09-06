@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __($general->site_name) }} - User Dashboard</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -49,6 +51,8 @@
             top: 0;
             width: var(--sidebar-width);
             height: 100vh;
+            height: 100dvh;
+            max-height: 100dvh;
             background: var(--sidebar-black);
             border-right: 1px solid var(--border-red);
             box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
@@ -56,6 +60,7 @@
             transition: var(--transition);
             display: flex;
             flex-direction: column;
+            overflow: hidden;
             /* Hide scrollbar but keep functionality */
             scrollbar-width: none;
             /* Firefox */
@@ -659,6 +664,10 @@
             margin-top: auto;
             flex-shrink: 0;
             border-top: 1px solid var(--border-red);
+            background: var(--sidebar-black);
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
         }
 
         /* Account Menu */
@@ -669,7 +678,12 @@
         /* Logout Section */
         .logout-section {
             padding: 10px 0;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
             background: var(--gradient-black);
+            border-top: 1px solid var(--border-red);
+            position: sticky;
+            bottom: 0;
+            z-index: 11;
         }
 
         .logout-link {
@@ -712,22 +726,37 @@
             box-shadow: var(--shadow-red);
         }
 
+        .mobile-top-bar > a {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
         .mobile-toggle {
-            background: transparent;
-            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-red);
+            border-radius: 50%;
             color: var(--text-white);
-            font-size: 20px;
+            font-size: 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .mobile-toggle:hover {
             color: var(--light-red);
+            border-color: var(--accent-red);
+            background: rgba(255, 0, 0, 0.15);
+            box-shadow: var(--shadow-red);
         }
 
         .mobile-logo-img {
@@ -740,18 +769,39 @@
 
         .mobile-notification {
             color: var(--text-white);
-            font-size: 18px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-red);
             text-decoration: none;
             transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .mobile-notification:hover {
             color: var(--light-red);
+            border-color: var(--accent-red);
+            background: rgba(255, 0, 0, 0.15);
+            box-shadow: var(--shadow-red);
+            transform: translateY(-1px);
+        }
+
+        .mobile-notification.mobile-logout {
+            color: #ff3333;
+            border-color: rgba(255, 0, 0, 0.4);
+            background: rgba(255, 0, 0, 0.12);
+        }
+
+        .mobile-notification.mobile-logout:hover {
+            background: var(--gradient-red);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
         }
 
         /* Overlay for mobile */
@@ -1147,9 +1197,16 @@
             <img src="{{ getImage(getFilePath('logoIcon') . '/logo.png') }}" alt="{{ __($general->site_name) }}"
                 class="mobile-logo-img">
         </a>
-        <a href="{{ route('ticket.index') }}" class="mobile-notification">
-            <i class="fas fa-comments"></i>
-        </a>
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <a href="{{ route('ticket.index') }}" class="mobile-notification" title="Support Messenger">
+                <i class="fas fa-comments"></i>
+            </a>
+            @auth
+                <a href="{{ route('user.logout') }}" class="mobile-notification mobile-logout" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            @endauth
+        </div>
     </div>
 
     <!-- Overlay for mobile -->
@@ -1258,6 +1315,14 @@
                         </a>
                     </li>
                 </ul>
+            </li>
+
+            <!-- Business Presentation -->
+            <li class="menu-item {{ request()->routeIs('user.presentation') ? 'active' : '' }}">
+                <a href="{{ route('user.presentation') }}" class="menu-link">
+                    <i class="fas fa-file-powerpoint"></i>
+                    <span class="menu-text">Business Presentation</span>
+                </a>
             </li>
 
             <!-- Investment -->

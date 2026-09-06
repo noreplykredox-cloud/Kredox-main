@@ -27,20 +27,19 @@ class AdminController extends Controller
         $pageTitle = 'Dashboard';
 
         // User Info
-        $widget['total_users']             = User::count();
+        $widget['total_users']             = User::where('is_deleted', 0)->count();
         $widget['verified_users']          = User::active()->count();
         $widget['email_unverified_users']  = User::emailUnverified()->count();
         $widget['mobile_unverified_users'] = User::mobileUnverified()->count();
 
         // Matrix Info
-        $widget['total_pins'] = Pin::count();
+        $widget['total_pins'] = Pin::whereHas('user', function($q){ $q->where('is_deleted', 0); })->orWhereNull('user_id')->count();
         $widget['total_plans'] = Plan::count();
-        $widget['total_commissions'] = Commission::sum('amount');
-        $widget['total_commissions'] = Commission::sum('amount');
-        $widget['total_used_pins'] = Pin::where('status', 1)->count();
+        $widget['total_commissions'] = Commission::whereHas('user', function($q){ $q->where('is_deleted', 0); })->sum('amount');
+        $widget['total_used_pins'] = Pin::where('status', 1)->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count();
 
         // user Browsing, Country, Operating Log
-        $userLoginData = UserLogin::where('created_at', '>=', Carbon::now()->subDay(30))->get(['browser', 'os', 'country']);
+        $userLoginData = UserLogin::whereHas('user', function($q){ $q->where('is_deleted', 0); })->where('created_at', '>=', Carbon::now()->subDay(30))->get(['browser', 'os', 'country']);
 
         $chart['user_browser_counter'] = $userLoginData->groupBy('browser')->map(function ($item, $key) {
             return collect($item)->count();
@@ -53,19 +52,19 @@ class AdminController extends Controller
         })->sort()->reverse()->take(5);
 
 
-        $deposit['total_deposit_amount']        = Deposit::successful()->sum('amount');
-        $deposit['total_deposit_pending']       = Deposit::pending()->count();
-        $deposit['total_deposit_rejected']      = Deposit::rejected()->count();
-        $deposit['total_deposit_charge']        = Deposit::successful()->sum('charge');
+        $deposit['total_deposit_amount']        = Deposit::successful()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->sum('amount');
+        $deposit['total_deposit_pending']       = Deposit::pending()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count();
+        $deposit['total_deposit_rejected']      = Deposit::rejected()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count();
+        $deposit['total_deposit_charge']        = Deposit::successful()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->sum('charge');
 
-        $withdrawals['total_withdraw_amount']   = Withdrawal::approved()->sum('amount');
-        $withdrawals['total_withdraw_pending']  = Withdrawal::pending()->count();
-        $withdrawals['total_withdraw_rejected'] = Withdrawal::rejected()->count();
-        $withdrawals['total_withdraw_charge']   = Withdrawal::approved()->sum('charge');
+        $withdrawals['total_withdraw_amount']   = Withdrawal::approved()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->sum('amount');
+        $withdrawals['total_withdraw_pending']  = Withdrawal::pending()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count();
+        $withdrawals['total_withdraw_rejected'] = Withdrawal::rejected()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count();
+        $withdrawals['total_withdraw_charge']   = Withdrawal::approved()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->sum('charge');
 
 
         $trxReport['date'] = collect([]);
-        $plusTrx = Transaction::where('trx_type','+')->where('created_at', '>=', Carbon::now()->subDays(30))
+        $plusTrx = Transaction::whereHas('user', function($q){ $q->where('is_deleted', 0); })->where('trx_type','+')->where('created_at', '>=', Carbon::now()->subDays(30))
                                        ->selectRaw("SUM(amount) as amount, DATE_FORMAT(created_at,'%Y-%m-%d') as date")
                                        ->orderBy('created_at')
                                        ->groupBy('date')
@@ -75,7 +74,7 @@ class AdminController extends Controller
             $trxReport['date']->push($trxData->date);
         });
 
-        $minusTrx = Transaction::where('trx_type','-')->where('created_at', '>=', Carbon::now()->subDays(30))
+        $minusTrx = Transaction::whereHas('user', function($q){ $q->where('is_deleted', 0); })->where('trx_type','-')->where('created_at', '>=', Carbon::now()->subDays(30))
                                        ->selectRaw("SUM(amount) as amount, DATE_FORMAT(created_at,'%Y-%m-%d') as date")
                                        ->orderBy('created_at')
                                        ->groupBy('date')
@@ -93,7 +92,7 @@ class AdminController extends Controller
         $report['deposit_month_amount'] = collect([]);
         $report['withdraw_month_amount'] = collect([]);
 
-        $depositsMonth = Deposit::where('created_at', '>=', Carbon::now()->subYear())
+        $depositsMonth = Deposit::whereHas('user', function($q){ $q->where('is_deleted', 0); })->where('created_at', '>=', Carbon::now()->subYear())
             ->where('status', Status::PAYMENT_SUCCESS)
             ->selectRaw("SUM( CASE WHEN status = ".Status::PAYMENT_SUCCESS." THEN amount END) as depositAmount")
             ->selectRaw("DATE_FORMAT(created_at,'%M-%Y') as months")
@@ -104,7 +103,7 @@ class AdminController extends Controller
             $report['months']->push($depositData->months);
             $report['deposit_month_amount']->push(getAmount($depositData->depositAmount));
         });
-        $withdrawalMonth = Withdrawal::where('created_at', '>=', Carbon::now()->subYear())->where('status', Status::PAYMENT_SUCCESS)
+        $withdrawalMonth = Withdrawal::whereHas('user', function($q){ $q->where('is_deleted', 0); })->where('created_at', '>=', Carbon::now()->subYear())->where('status', Status::PAYMENT_SUCCESS)
             ->selectRaw("SUM( CASE WHEN status = ".Status::PAYMENT_SUCCESS." THEN amount END) as withdrawAmount")
             ->selectRaw("DATE_FORMAT(created_at,'%M-%Y') as months")
             ->orderBy('created_at')
@@ -270,5 +269,10 @@ class AdminController extends Controller
         return readfile($filePath);
     }
 
+    public function presentationShare()
+    {
+        $pageTitle = 'Share Business Presentation';
+        return view('admin.presentation_share', compact('pageTitle'));
+    }
 
 }

@@ -375,7 +375,7 @@
             
             <h2 class="error-title">PROTOCOL BREACH DETECTED</h2>
             <p class="error-desc">
-                ACCESS DENIED. The encrypted resource you are attempting to retrieve has been declassified, relocated, or purged from our secure network layers. Unauthorized access attempts are being logged and monitored by the TRX-Security Protocol.
+                ACCESS DENIED. The encrypted resource you are attempting to retrieve has been declassified, relocated, or purged from our secure network layers. Unauthorized access attempts are being logged and monitored by the Kredox-Security Protocol.
             </p>
         </div>
 

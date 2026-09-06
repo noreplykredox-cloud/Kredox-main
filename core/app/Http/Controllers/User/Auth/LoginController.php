@@ -113,6 +113,13 @@ class LoginController extends Controller
 
     }
 
+    protected function credentials(Request $request)
+    {
+        $credentials = $request->only($this->username(), 'password');
+        $credentials['is_deleted'] = 0;
+        return $credentials;
+    }
+
     public function logout()
     {
         $this->guard()->logout();
