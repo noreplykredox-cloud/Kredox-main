@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 
-Route::post('/send-otp', 'YourController@sendOTP')->name('send.otp');
+Route::post('/send-otp', 'PlanController@sendOtp')->name('send.otp');
 
 
 Route::get('/clear', function(){
@@ -25,6 +25,7 @@ Route::controller('TicketController')->prefix('ticket')->name('ticket.')->group(
 Route::get('/subscribe/plan', 'PlanController@plan')->name('plan');
 
 Route::controller('SiteController')->group(function () {
+    Route::get('/presentation', 'presentation')->name('public.presentation');
     Route::get('/contact', 'contact')->name('contact');
     Route::post('/contact', 'contactSubmit');
     Route::get('/change/{lang?}', 'changeLanguage')->name('lang');

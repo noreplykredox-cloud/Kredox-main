@@ -41,7 +41,7 @@ class ProcessDailyReferralPayout extends Command
 
         foreach ($roiTransactions as $trx) {
             $downlineUser = User::find($trx->user_id);
-            if (!$downlineUser) continue;
+            if (!$downlineUser || $downlineUser->is_deleted) continue;
 
             $uplines = $this->getUplineUsers($downlineUser);
 
@@ -102,7 +102,7 @@ class ProcessDailyReferralPayout extends Command
 
                 // Condition: To receive Level N income, the upline must have at least N direct referrals
                 $requiredDirects = $level + 1;
-                $directsCount = User::where('ref_by', $upline->id)->count();
+                $directsCount = User::where('ref_by', $upline->id)->where('is_deleted', 0)->count();
 
                 if ($directsCount < $requiredDirects) {
                     $this->info("⏭️ Skipped Level " . ($level + 1) . " commission for {$upline->username} because they have {$directsCount} directs (requires {$requiredDirects}).");
@@ -149,7 +149,9 @@ class ProcessDailyReferralPayout extends Command
             $upline = User::with('plan')->find($current->ref_by);
             if (!$upline) break;
 
-            $uplines[$level] = $upline;
+            if (!$upline->is_deleted) {
+                $uplines[$level] = $upline;
+            }
             $current = $upline;
             $level++;
         }

@@ -97,7 +97,7 @@ class ProcessManualPayments extends Command
     private function processUserPayment($payment)
     {
         $user = User::find($payment->user_id);
-        if (!$user) return;
+        if (!$user || $user->is_deleted) return;
 
         $user->balance += $payment->amount;
         $user->save();
@@ -119,7 +119,7 @@ class ProcessManualPayments extends Command
 
     private function processPlanPayment($payment, $now)
     {
-        $users = User::where('plan_id', $payment->plan_id)->where('invest_amount', '>', 0)->get();
+        $users = User::where('plan_id', $payment->plan_id)->where('invest_amount', '>', 0)->where('is_deleted', 0)->get();
         if ($users->isEmpty()) return;
 
         foreach ($users as $user) {

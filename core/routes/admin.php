@@ -41,6 +41,9 @@ Route::middleware('admin')->group(function () {
         Route::get('request-report', 'requestReport')->name('request.report');
         Route::post('request-report', 'reportSubmit');
 
+        //Presentation Share
+        Route::get('presentation-share', 'presentationShare')->name('presentation.share');
+
         Route::get('download-attachments/{file_hash}', 'downloadAttachment')->name('download.attachment');
     });
 
@@ -72,6 +75,9 @@ Route::middleware('admin')->group(function () {
         Route::post('send-notification/{id}', 'sendNotificationSingle')->name('notification.single');
         Route::get('login/{id}', 'login')->name('login');
         Route::post('status/{id}', 'status')->name('status');
+        Route::get('deleted', 'deletedUsers')->name('deleted');
+        Route::post('delete/{id}', 'deleteUser')->name('delete');
+        Route::post('restore/{id}', 'restoreUser')->name('restore');
         Route::post('pay-schedule/{id}', 'paySchedule')->name('pay.schedule');
 
         Route::get('send-notification', 'showNotificationAllForm')->name('notification.all');

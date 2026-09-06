@@ -182,6 +182,18 @@
                     </button>
                     @endif
                 </div>
+
+                <div class="flex-fill">
+                    @if(!$user->is_deleted)
+                    <button type="button" class="btn btn--danger btn--gradi btn--shadow w-100 btn-lg" data-bs-toggle="modal" data-bs-target="#deleteUserModal" data-toggle="modal" data-target="#deleteUserModal">
+                        <i class="las la-trash-alt"></i>@lang('Delete User')
+                    </button>
+                    @else
+                    <button type="button" class="btn btn--success btn--gradi btn--shadow w-100 btn-lg" data-bs-toggle="modal" data-bs-target="#restoreUserModal" data-toggle="modal" data-target="#restoreUserModal">
+                        <i class="las la-redo-alt"></i>@lang('Restore User')
+                    </button>
+                    @endif
+                </div>
             </div>
 
 
@@ -654,9 +666,64 @@
                         @if($user->status == Status::USER_ACTIVE)
                         <button type="submit" class="btn btn--primary h-45 w-100">@lang('Submit')</button>
                         @else
-                        <button type="button" class="btn btn--dark" data-bs-dismiss="modal">@lang('No')</button>
+                        <button type="button" class="btn btn--dark" data-bs-dismiss="modal" data-dismiss="modal">@lang('No')</button>
                         <button type="submit" class="btn btn--primary">@lang('Yes')</button>
                         @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteUserModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span>@lang('Delete User')</span>
+                    </h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                        <i class="las la-times"></i>
+                    </button>
+                </div>
+                <form action="{{route('admin.users.delete', $user->id)}}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <h6 class="mb-2">@lang('If you delete this user he/she won\'t able to access his/her dashboard. The user will be moved to the Deleted Users list and can be restored anytime.')</h6>
+                        <div class="form-group mt-3">
+                            <label>@lang('Reason')</label>
+                            <textarea class="form-control" name="reason" rows="4" placeholder="@lang('Reason for deleting user...')" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn--dark" data-bs-dismiss="modal" data-dismiss="modal">@lang('No')</button>
+                        <button type="submit" class="btn btn--danger">@lang('Yes, Delete')</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <div id="restoreUserModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <span>@lang('Restore User')</span>
+                    </h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close">
+                        <i class="las la-times"></i>
+                    </button>
+                </div>
+                <form action="{{ route('admin.users.restore', $user->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-body text-center">
+                        <h6 class="mb-2">@lang('Are you sure to restore this user?')</h6>
+                        <p class="text-muted fs-13 mt-2">
+                            @lang('This will reactivate user') <strong>{{ $user->fullname }} ({{ $user->username }})</strong> @lang('and restore access to his/her dashboard.')
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn--dark" data-bs-dismiss="modal" data-dismiss="modal">@lang('No')</button>
+                        <button type="submit" class="btn btn--success">@lang('Yes, Restore')</button>
                     </div>
                 </form>
             </div>

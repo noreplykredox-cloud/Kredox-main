@@ -18,6 +18,13 @@ class CheckStatus
     {
         if (Auth::check()) {
             $user = auth()->user();
+            if ($user->is_deleted) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $notify[] = ['error', 'Your account has been deleted.'];
+                return to_route('user.login')->withNotify($notify);
+            }
+
             if ($user->status  && $user->ev  && $user->sv  && $user->tv) {
                 return $next($request);
             } else {

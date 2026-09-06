@@ -143,7 +143,7 @@ protected function create(array $data)
     $general = gs();
 
     $referBy = session()->get('reference');
-    $referUser = $referBy ? User::where('username', $referBy)->first() : null;
+    $referUser = $referBy ? User::where('username', $referBy)->where('is_deleted', 0)->first() : null;
 
     //User Create
     $user = new User();

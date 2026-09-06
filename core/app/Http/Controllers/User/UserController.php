@@ -8,6 +8,7 @@ use App\Lib\FormProcessor;
 use App\Lib\GoogleAuthenticator;
 use App\Models\AdminNotification;
 use App\Models\Commission;
+use App\Models\Deposit;
 use App\Models\Form;
 use App\Models\Transaction;
 use App\Models\User;
@@ -55,10 +56,10 @@ class UserController extends Controller
         }
 
         $pageTitle = 'Dashboard';
-        $deposit = $user->deposits()->sum('amount');
+        $deposit = Deposit::where('user_id', $user->id)->where('status', Status::PAYMENT_SUCCESS)->sum('amount');
         $transactions = $user->transactions()->orderBy('id', 'desc')->limit(8)->get();
         $commission = Commission::where('user_id', $user->id)->sum('amount');
-        $withdraw = Withdrawal::where('user_id', $user->id)->where('status', '!=', Status::PAYMENT_INITIATE)->sum('amount');
+        $withdraw = Withdrawal::where('user_id', $user->id)->where('status', Status::PAYMENT_SUCCESS)->sum('amount');
         $transaction = $user->transactions()->count();
         $username = $user->username;
         $balance = $user->balance;
@@ -70,6 +71,12 @@ class UserController extends Controller
         $pageTitle = 'Deposit History';
         $deposits = auth()->user()->deposits()->searchable(['trx'])->with(['gateway'])->orderBy('id', 'desc')->get();
         return view($this->activeTemplate . 'user.deposit_history', compact('pageTitle', 'deposits'));
+    }
+
+    public function presentation()
+    {
+        $pageTitle = 'Business Presentation';
+        return view($this->activeTemplate . 'user.presentation', compact('pageTitle'));
     }
 
     public function show2faForm()
@@ -242,7 +249,7 @@ class UserController extends Controller
             'username' => 'required'
         ]);
         $user = auth()->user();
-        $toUser = User::where('status', Status::VERIFIED)->where('username', $request->username)->first();
+        $toUser = User::where('status', Status::VERIFIED)->where('username', $request->username)->where('is_deleted', 0)->first();
         if (!$toUser) {
             $notify[] = ['error', 'Receiver not found'];
             return back()->withNotify($notify);
@@ -344,7 +351,7 @@ class UserController extends Controller
     private function showBelow($id)
     {
         $newArray = array();
-        $underReferral = User::where('position_id', $id)->get();
+        $underReferral = User::where('position_id', $id)->where('is_deleted', 0)->get();
         foreach ($underReferral as $value) {
             array_push($newArray, $value->id);
         }

@@ -196,7 +196,7 @@ class Matrix
     * @return array
     */
     private function showPositionBelow($id){
-       return User::where('position_id',$id)->pluck('id')->toArray();
+       return User::where('position_id',$id)->where('is_deleted', 0)->pluck('id')->toArray();
     }
 
     /**
@@ -206,7 +206,7 @@ class Matrix
     * @return integer
     */
     private function nextPosition($id){
-        $count = User::where('position_id', $id)->count();
+        $count = User::where('position_id', $id)->where('is_deleted', 0)->count();
 
         if($count < $this->width){
             return $count+1;
@@ -225,7 +225,7 @@ class Matrix
         $referral = $user->referral;
         $plan = $this->plan;
         
-        if ($referral && $plan->referral_percentage > 0) {
+        if ($referral && !$referral->is_deleted && $plan->referral_percentage > 0) {
             $bonus = ($this->amount * $plan->referral_percentage / 100);
             $referral->balance += $bonus;
             $referral->save();
@@ -273,12 +273,12 @@ class Matrix
             }
 
             $upper = $user->upper;
-            if (!$upper) {
+            if (!$upper || $upper->is_deleted) {
                 break;
             }
 
             $requiredReferrals = $i + 1; // Level N requires N direct referrals
-            $actualReferrals = \App\Models\User::where('ref_by', $upper->id)->count();
+            $actualReferrals = \App\Models\User::where('ref_by', $upper->id)->where('is_deleted', 0)->count();
 
             if ($actualReferrals < $requiredReferrals) {
                 $user = $upper; // Move up the tree even if commission is skipped

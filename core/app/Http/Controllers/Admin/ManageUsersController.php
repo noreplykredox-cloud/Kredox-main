@@ -168,7 +168,14 @@ public function updateManualPayment(Request $request, $id)
         }else{
             $users = User::query();
         }
-        return $users->searchable(['username','email'])->orderBy('id','desc')->paginate(getPaginate());
+        return $users->where('is_deleted', 0)->searchable(['username','email'])->orderBy('id','desc')->paginate(getPaginate());
+    }
+
+    public function deletedUsers()
+    {
+        $pageTitle = 'Deleted Users';
+        $users = User::where('is_deleted', 1)->searchable(['username','email'])->orderBy('id','desc')->paginate(getPaginate());
+        return view('admin.users.list', compact('pageTitle', 'users'));
     }
 
 
@@ -589,7 +596,7 @@ public function updateManualPayment(Request $request, $id)
     {
         if ($depth > $maxDepth) return [];
 
-        $referrals = User::where('ref_by', $user->id)->with('plan')->get();
+        $referrals = User::where('ref_by', $user->id)->where('is_deleted', 0)->with('plan')->get();
         $tree = [];
         $now = Carbon::now();
 
@@ -704,7 +711,7 @@ public function updateManualPayment(Request $request, $id)
 
     private function getTeamStats($user)
     {
-        $referrals = User::where('ref_by', $user->id)->get();
+        $referrals = User::where('ref_by', $user->id)->where('is_deleted', 0)->get();
         $teamCount = $referrals->count();
         $investmentSum = $referrals->sum('invest_amount');
 
@@ -855,7 +862,7 @@ public function updateManualPayment(Request $request, $id)
     private function getFlatDownlines($user, $depth = 1, $maxDepth = 10)
     {
         if ($depth > $maxDepth) return [];
-        $referrals = User::where('ref_by', $user->id)->get();
+        $referrals = User::where('ref_by', $user->id)->where('is_deleted', 0)->get();
         $flat = [];
         foreach ($referrals as $ref) {
             $flat[] = [
@@ -894,7 +901,7 @@ public function updateManualPayment(Request $request, $id)
 
             // Check if upline has required direct referrals for this level
             $requiredDirects = $level;
-            $directsCount = User::where('ref_by', $user->id)->count();
+            $directsCount = User::where('ref_by', $user->id)->where('is_deleted', 0)->count();
             $meetsRequirement = $directsCount >= $requiredDirects;
 
             // Get downline's scheduled ROI payments
@@ -1165,6 +1172,10 @@ public function updateManualPayment(Request $request, $id)
         ]);
 
         $user = User::findOrFail($id);
+        if ($user->is_deleted) {
+            $notify[] = ['error', 'Deleted user cannot receive payments.'];
+            return back()->withNotify($notify);
+        }
 
         if ($request->schedule_type === 'user') {
             $payment = ManualPayment::where('id', $request->schedule_id)
@@ -1354,5 +1365,25 @@ public function updateManualPayment(Request $request, $id)
         $transaction->save();
 
         return $transaction;
+    }
+
+    public function deleteUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->is_deleted = 1;
+        $user->save();
+
+        $notify[] = ['success', 'User ' . $user->username . ' has been moved to Deleted Users list.'];
+        return to_route('admin.users.deleted')->withNotify($notify);
+    }
+
+    public function restoreUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->is_deleted = 0;
+        $user->save();
+
+        $notify[] = ['success', 'User ' . $user->username . ' has been restored successfully.'];
+        return back()->withNotify($notify);
     }
 }

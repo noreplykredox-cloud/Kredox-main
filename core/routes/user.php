@@ -72,6 +72,9 @@ Route::middleware('auth')->name('user.')->group(function () {
                 Route::any('deposit/history', 'depositHistory')->name('deposit.history');
                 Route::get('transactions', 'transactions')->name('transactions');
 
+                // Presentation
+                Route::get('presentation', 'presentation')->name('presentation');
+
                 Route::get('attachment-download/{fil_hash}', 'attachmentDownload')->name('attachment.download');
             });
 

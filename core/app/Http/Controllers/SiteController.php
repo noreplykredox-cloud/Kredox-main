@@ -39,6 +39,12 @@ class SiteController extends Controller
         return view($this->activeTemplate . 'home', compact('pageTitle', 'sections'));
     }
 
+    public function presentation()
+    {
+        $pageTitle = 'Business Presentation';
+        return view($this->activeTemplate . 'user.presentation', compact('pageTitle'));
+    }
+
     public function pages($slug)
     {
         $page = Page::where('tempname', $this->activeTemplate)->where('slug', $slug)->firstOrFail();

@@ -38,9 +38,13 @@ class AppServiceProvider extends ServiceProvider
         $viewShare['general'] = $general;
         $viewShare['activeTemplate'] = $activeTemplate;
         $viewShare['activeTemplateTrue'] = activeTemplate(true);
-        $viewShare['language'] = Language::all();
+        $viewShare['language'] = cache()->remember('app_languages', 3600, function() {
+            return Language::all();
+        });
         $viewShare['emptyMessage'] = 'Data not found';
-        $viewShare['pages'] = Page::where('tempname',$activeTemplate)->where('is_default', Status::NO)->get();
+        $viewShare['pages'] = cache()->remember('app_pages_' . $activeTemplate, 3600, function() use ($activeTemplate) {
+            return Page::where('tempname', $activeTemplate)->where('is_default', Status::NO)->get();
+        });
         view()->share($viewShare);
 
 
@@ -52,8 +56,8 @@ class AppServiceProvider extends ServiceProvider
                 'kycUnverifiedUsersCount'   => User::kycUnverified()->count(),
                 'kycPendingUsersCount'   => User::kycPending()->count(),
                 'pendingTicketCount'         => SupportTicket::whereIN('status', [Status::TICKET_OPEN, Status::TICKET_REPLY])->count(),
-                'pendingDepositsCount'    => Deposit::pending()->count(),
-                'pendingWithdrawCount'    => Withdrawal::pending()->count(),
+                'pendingDepositsCount'    => Deposit::pending()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count(),
+                'pendingWithdrawCount'    => Withdrawal::pending()->whereHas('user', function($q){ $q->where('is_deleted', 0); })->count(),
             ]);
         });
 

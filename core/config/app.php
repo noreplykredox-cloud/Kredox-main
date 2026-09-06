@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Facade;
-require_once('timezone.php');
+if (file_exists(__DIR__ . '/timezone.php')) {
+    include __DIR__ . '/timezone.php';
+}
 return [
 
     /*
@@ -41,7 +43,7 @@ return [
     |
     */
 
-    'debug' => (bool) env('APP_DEBUG', false),
+    'debug' => (bool) env('APP_DEBUG', true),
 
     /*
     |--------------------------------------------------------------------------
@@ -69,7 +71,7 @@ return [
     |
     */
 
-    'timezone' => $timezone,
+    'timezone' => isset($timezone) ? $timezone : 'Asia/Kolkata',
 
 
     /*

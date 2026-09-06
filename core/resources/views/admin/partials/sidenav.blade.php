@@ -107,6 +107,13 @@
                                 </a>
                             </li>
 
+                            <li class="sidebar-menu-item {{ menuActive('admin.users.deleted') }} ">
+                                <a href="{{ route('admin.users.deleted') }}" class="nav-link">
+                                    <i class="menu-icon las la-dot-circle"></i>
+                                    <span class="menu-title">@lang('Deleted Users')</span>
+                                </a>
+                            </li>
+
 
                             <li class="sidebar-menu-item {{ menuActive('admin.users.notification.all') }}">
                                 <a href="{{ route('admin.users.notification.all') }}" class="nav-link">
@@ -127,6 +134,13 @@
 }
 
                 </style>
+
+                <li class="sidebar-menu-item {{ menuActive('admin.presentation.share') }}">
+                    <a href="{{ route('admin.presentation.share') }}" class="nav-link">
+                        <i class="menu-icon las la-share-alt"></i>
+                        <span class="menu-title">@lang('Share Presentation')</span>
+                    </a>
+                </li>
 
                 <li class="sidebar-menu-item hide-mobile {{ menuActive('admin.plan.*') }}">
                     <a href="{{ route('admin.plan.index') }}" class="nav-link"
